@@ -1,0 +1,65 @@
+[
+    {
+        "source": "arXiv",
+        "title": "AgenticGEO: A Self-Evolving Agentic System for Generative Engine Optimization",
+        "url": "https://arxiv.org/abs/2603.20213",
+        "snippet": "arXiv:2603.20213v1 Announce Type: new \nAbstract: Generative search engines represent a transition from traditional ranking-based retrieval to Large Language Model (LLM)-based synthesis, transforming optimization goals from ranking prominence towards content inclusion. Generative Engine Optimization (GEO), specifically, aims to maximize visibility and attribution in black-box summarized outputs by strategically manipulating source content. However, existing methods rely on static heuristics, single-prompt optimization, or engine preference rule distillation that is prone to overfitting. They cannot flexibly adapt to diverse content or the changing behaviors of generative engines. Moreover, effectively optimizing these strategies requires an impractical amount of interaction feedback from the engines. To address these challenges, we propose AgenticGEO, a self-evolving agentic framework formulating optimization as a content-conditioned control problem, which enhances intrinsic content quality to robustly adapt to the unpredictable behaviors of black-box engines. Unlike fixed-strategy methods, AgenticGEO employs a MAP-Elites archive to evolve diverse, compositional strategies. To mitigate interaction costs, we introduce a Co-Evolving Critic, a lightweight surrogate that approximates engine feedback for content-specific strategy selection and refinement, efficiently guiding both evolutionary search and inference-time planning. Through extensive in-domain and cross-domain experiments on two representative engines, AgenticGEO achieves state-of-the-art performance and demonstrates robust transferability, outperforming 14 baselines across 3 datasets. Our code and model are available at: https://github.com/AIcling/agentic_geo.",
+        "ai_summary": "研究人员提出名为AgenticGEO的自进化智能体框架，以应对生成式搜索引擎优化（GEO）的挑战。该框架将优化问题转化为内容条件控制问题，通过进化算法生成多样化策略，并引入协同进化评估器来降低与搜索引擎的交互成本。实验表明，该方法在多个数据集和引擎上优于现有基线，表现出优异的性能与可迁移性。"
+    },
+    {
+        "source": "arXiv",
+        "title": "ProMAS: Proactive Error Forecasting for Multi-Agent Systems Using Markov Transition Dynamics",
+        "url": "https://arxiv.org/abs/2603.20260",
+        "snippet": "arXiv:2603.20260v1 Announce Type: new \nAbstract: The integration of Large Language Models into Multi-Agent Systems (MAS) has enabled the so-lution of complex, long-horizon tasks through collaborative reasoning. However, this collec-tive intelligence is inherently fragile, as a single logical fallacy can rapidly propagate and lead to system-wide failure. Most current research re-lies on post-hoc failure analysis, thereby hinder-ing real-time intervention. To address this, we propose PROMAS, a proactive framework utiliz-ing Markov transitions for predictive error anal-ysis. PROMAS extracts Causal Delta Features to capture semantic displacement, mapping them to a quantized Vector Markov Space to model reasoning as probabilistic transitions. By inte-grating a Proactive Prediction Head with Jump Detection, the method localizes errors via risk acceleration rather than static thresholds. On the Who&When benchmark, PROMAS achieves 22.97% step-level accuracy while processing only 27% of reasoning logs. This performance rivals reactive monitors like MASC while reducing data overhead by 73%. Although this strategy entails an accuracy trade-off compared to post-hoc meth-ods, it significantly improves intervention latency, balancing diagnostic precision with the real-time demands of autonomous reasoning.",
+        "ai_summary": "大型语言模型在多智能体系统中的协作推理能力面临逻辑错误快速传播的脆弱性问题。现有研究多依赖事后分析，难以实时干预。为此，研究团队提出PROMAS框架，通过马尔可夫转移和因果特征量化进行预测性错误分析，在基准测试中以仅处理27%推理日志实现22.97%的步骤准确率，在降低73%数据开销的同时显著提升实时干预能力。"
+    },
+    {
+        "source": "arXiv",
+        "title": "Domain-Specialized Tree of Thought through Plug-and-Play Predictors",
+        "url": "https://arxiv.org/abs/2603.20267",
+        "snippet": "arXiv:2603.20267v1 Announce Type: new \nAbstract: While Large Language Models (LLMs) have advanced complex reasoning, prominent methods like the Tree of Thoughts (ToT) framework face a critical trade-off between exploration depth and computational efficiency. Existing ToT implementations often rely on heavyweight LLM-based self-evaluation or rigid heuristics for branch pruning, making them prohibitively expensive and inflexible for broad application. To address this, we introduce DST, an adaptable, plug-and-play predictor that serves as a lightweight, supervised heuristic to guide the ToT search process. Our predictor enables dynamic, context-aware pruning, allowing the search to proceed with near-greedy efficiency on simpler reasoning steps while adaptively expanding the search beam only when encountering uncertainty or task complexity. We evaluate our approach on a diverse suite of benchmarks spanning mathematical reasoning, general reasoning, and complex logical reasoning. Experimental results demonstrate that our method achieves accuracy competitive with or superior to strong baselines, including standard ToT, while reducing computational overhead by 26-75%. Our work effectively resolves the accuracy-efficiency trade-off in tree-based reasoning, transforming ToT from a resource-intensive technique into a scalable and practical paradigm for complex problem-solving in LLMs.",
+        "ai_summary": "研究人员提出一种名为DST的轻量级预测器，用于优化大语言模型中的思维树推理框架。该方法通过动态剪枝策略，在保持推理准确性的同时，将计算开销降低26%-75%，有效解决了传统方法在探索深度与计算效率之间的权衡问题。"
+    },
+    {
+        "source": "量子位",
+        "title": "LeCun的世界模型单GPU就能跑了",
+        "url": "https://www.qbitai.com/2026/03/391698.html",
+        "snippet": "LeCun世界模型最新进展，开源了一套极简训练方案，单GPU就能跑。 这套方案叫LeWorldModel，它基于JEPA架构，实现像素输入直接预测未来，速度快到离谱，完整规划仅需1秒。 ",
+        "ai_summary": "LeCun团队开源了名为LeWorldModel的世界模型训练方案，基于JEPA架构，可直接从像素输入预测未来画面。该方案仅需单GPU即可运行，规划速度极快，完整预测仅需1秒。"
+    },
+    {
+        "source": "量子位",
+        "title": "又一华为天才少年入局具身创业！用视频生成数据训家用机器人，首个模型登顶具身基模榜单",
+        "url": "https://www.qbitai.com/2026/03/391668.html",
+        "snippet": "最新模型在Embodied Arena登顶 6G冲浪的量子位最新发现，去年从华为诺亚方舟实验室转入学界的周凯文，在入职港中文不到半年后，悄然更新了个人主页。 ",
+        "ai_summary": "港中文教授周凯文更新个人主页，其最新模型在Embodied Arena榜单中取得领先成绩。"
+    },
+    {
+        "source": "量子位",
+        "title": "阿里在海外上了个“企业级龙虾”，我用它30分钟手搓了一家网店",
+        "url": "https://www.qbitai.com/2026/03/391584.html",
+        "snippet": "30分钟，我用阿里凌晨在海外刚上线的“企业版龙虾”，开了家网店。 剩下的活它就会自动帮我干，而且最终效果还不赖： ",
+        "ai_summary": "阿里新推出的“企业版龙虾”工具，可帮助用户在30分钟内快速开设网店，并自动完成后续运营工作，效果良好。"
+    },
+    {
+        "source": "36Kr",
+        "title": "本田遭遇“双重暴击”：上市69年首亏，服务被指“虚假宣传”",
+        "url": "https://36kr.com/p/3736637828313602",
+        "snippet": "2025年，国际车企面临电动化转型调整、全球贸易壁垒、市场需求分化的多重夹击，销量和利润都遭遇打击。 日系车企在华份额也正逐渐衰落。根据中国汽车工业协会的数据，2025年，中国品牌乘用车销量占有率为69.5%，外资、合资为30%左右，其中，日系占有率排在德系之后，为9.7%。 ",
+        "ai_summary": "2025年，国际车企在电动化转型、贸易壁垒及市场分化等多重压力下，销量与利润普遍承压。日系品牌在华市场份额持续下滑，据中汽协数据，中国品牌乘用车市占率达69.5%，日系品牌占比为9.7%，位居德系之后。"
+    },
+    {
+        "source": "36Kr",
+        "title": "具身智能的三重泡沫：4.5%的真相，4倍的分歧，与一道所有人都算不对的算术题",
+        "url": "https://36kr.com/p/3736721774690566",
+        "snippet": "你是否关注到了，最近70天左右，一场涉及200亿的集体FOMO（错失恐惧症）狂欢。 2026年开年70天之内，具身智能赛道涌入了约200亿元热钱。13家百亿估值独角兽拔地而起，超过20家企业明确提出上市计划。 ",
+        "ai_summary": "2026年初70天内，具身智能赛道融资约200亿元，涌现13家百亿估值独角兽，超20家企业计划上市。"
+    },
+    {
+        "source": "36Kr",
+        "title": "将微软列为“潜在风险”？OpenAI发言人回应",
+        "url": "https://36kr.com/p/3736692639858695",
+        "snippet": "3月24日，美国知名人工智能公司OpenAI在一份类似IPO招股说明书的文件中表示，公司与微软关系密切，这可能对公司业务构成潜在风险，并告知投资者，微软负责“公司相当一部分的融资和计算”。除了与微软的关系外，OpenAI还列举了其他风险，例如巨额资本支出、对计算资源的依赖、与马斯克旗下xAI公司持续不断的诉讼，以及其作为公益公司的特殊结构。 OpenAI在分发给投资者的文件中表示，其经营业绩将取决于其能否成功地与微软以外的其他合作伙伴建立关系。OpenAI称，“如果微软修改或终止与我们的商业合作关系，或者如果我们无法成功实现业务合作伙伴多元化，我们的业务、前景、经营业绩和财务状况可能会受到不利影响。” ",
+        "ai_summary": "OpenAI在投资者文件中指出，公司业务高度依赖微软的融资与计算资源，若合作关系变动或未能实现合作伙伴多元化，可能对经营造成不利影响。此外，公司还面临高资本支出、计算资源依赖、与xAI的诉讼及特殊治理结构等风险。"
+    }
+]
