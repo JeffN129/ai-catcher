@@ -73,6 +73,7 @@ def get_article_detail(url, timeout=10):
     snippet, pub_time_str = "未能提取到有效正文", ""
     try:
         response = requests.get(url, headers=get_random_headers(), timeout=timeout)
+        
         response.raise_for_status()
         response.encoding = response.apparent_encoding 
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -106,6 +107,7 @@ def generic_news_fetcher(source_name, target_url, limit=3, timeout=10, must_cont
     
     try:
         response = requests.get(target_url, headers=get_random_headers(), timeout=timeout)
+        response.encoding = response.apparent_encoding
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         
