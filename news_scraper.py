@@ -77,6 +77,11 @@ def get_article_detail(url, timeout=10):
         response.raise_for_status()
         response.encoding = response.apparent_encoding 
         soup = BeautifulSoup(response.text, 'html.parser')
+
+        #优先寻找 Open Graph 协议的封面图
+        og_image = soup.find('meta', property='og:image')
+        if og_image and og_image.get('content'):
+            cover_image_url = og_image['content']
         
         # 1. 提取正文片段
         paragraphs = soup.find_all('p')
@@ -94,7 +99,7 @@ def get_article_detail(url, timeout=10):
         
     except Exception as e:
         pass
-    return snippet, parse_publish_time(pub_time_str)
+    return snippet, parse_publish_time(pub_time_str), cover_image_url
 
 # ==========================================
 # 🤖 通用网站抓取器 (自动寻路逻辑)
@@ -140,6 +145,7 @@ def generic_news_fetcher(source_name, target_url, limit=3, timeout=10, must_cont
                 'url': full_link,
                 'snippet': snippet,
                 'publish_time': pub_time
+                'cover_image_url': cover_img
             })
             count += 1
             time.sleep(random.uniform(1.5, 3)) # 礼貌延时
