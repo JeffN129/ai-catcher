@@ -1,19 +1,20 @@
+import os
 import requests
 from bs4 import BeautifulSoup
+import feedparser
 import logging
 import time
 import random
 import re
 from datetime import datetime, timedelta
+from urllib.parse import urljoin
+# 确保导入你的 AI 总结模块
 from ai_summarizer import process_and_save_news  
 
 # ==========================================
 # ⚙️ 基础配置与日志
 # ==========================================
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
@@ -30,32 +31,22 @@ def get_random_headers():
     }
 
 # ==========================================
-# 🕒 第一部分：时间解析引擎 (Time Parser)
+# 🕒 时间解析引擎 (Time Parser)
 # ==========================================
 def parse_publish_time(time_str):
-    """
-    健壮的时间解析辅助函数。
-    支持标准格式和相对格式，解析失败默认返回当前系统时间。
-    返回：datetime 对象
-    """
+    """健壮的时间解析，支持相对时间和绝对时间"""
     now = datetime.now()
-    if not time_str:
-        return now
-        
+    if not time_str: return now
     time_str = str(time_str).strip()
     
     try:
-        # 1. 处理相对时间 (刚刚, x分钟前, x小时前)
-        if "刚刚" in time_str:
-            return now
-            
+        if "刚刚" in time_str: return now
+        
         match_min = re.search(r'(\d+)\s*分钟前', time_str)
-        if match_min:
-            return now - timedelta(minutes=int(match_min.group(1)))
+        if match_min: return now - timedelta(minutes=int(match_min.group(1)))
             
         match_hour = re.search(r'(\d+)\s*小时前', time_str)
-        if match_hour:
-            return now - timedelta(hours=int(match_hour.group(1)))
+        if match_hour: return now - timedelta(hours=int(match_hour.group(1)))
             
         if "昨天" in time_str:
             match_time = re.search(r'(\d{1,2}):(\d{2})', time_str)
@@ -64,8 +55,7 @@ def parse_publish_time(time_str):
                 return now.replace(hour=hour, minute=minute, second=0) - timedelta(days=1)
             return now - timedelta(days=1)
             
-        # 2. 处理标准格式 (YYYY-MM-DD HH:MM 或 MM-DD 等)
-        # 匹配 2026-03-25 14:00 或 2026/03/25
+        # 匹配 YYYY-MM-DD HH:MM
         match_date = re.search(r'(\d{4})[-\./年](\d{1,2})[-\./月](\d{1,2})日?(?:\s+(\d{1,2}):(\d{2}))?', time_str)
         if match_date:
             year, month, day = map(int, match_date.groups()[:3])
@@ -73,169 +63,193 @@ def parse_publish_time(time_str):
             minute = int(match_date.group(5)) if match_date.group(5) else 0
             return datetime(year, month, day, hour, minute)
             
-        # 若都不匹配，但包含了数字，尝试作为今年处理 (如 "03-25 14:00")
-        match_short_date = re.search(r'(\d{1,2})[-\./月](\d{1,2})日?(?:\s+(\d{1,2}):(\d{2}))?', time_str)
-        if match_short_date:
-            month, day = int(match_short_date.group(1)), int(match_short_date.group(2))
-            hour = int(match_short_date.group(3)) if match_short_date.group(3) else 0
-            minute = int(match_short_date.group(4)) if match_short_date.group(4) else 0
-            return datetime(now.year, month, day, hour, minute)
-            
     except Exception as e:
-        logging.warning(f"时间解析引擎无法识别格式 '{time_str}', 错误: {e}. 默认赋予当前时间.")
+        logging.warning(f"时间解析失败 '{time_str}', 错误: {e}")
         
     return now
 
+def get_article_detail(url, timeout=10):
+    """访问文章详情页，智能提取正文摘要和发布时间"""
+    snippet, pub_time_str = "未能提取到有效正文", ""
+    try:
+        response = requests.get(url, headers=get_random_headers(), timeout=timeout)
+        response.raise_for_status()
+        response.encoding = response.apparent_encoding 
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # 1. 提取正文片段
+        paragraphs = soup.find_all('p')
+        text_content = ""
+        for p in paragraphs:
+            text = p.get_text(strip=True)
+            if len(text) > 20: text_content += text + " "
+            if len(text_content) > 150: break
+        if text_content: snippet = text_content
+            
+        # 2. 尝试从网页文本中用正则抓取日期格式
+        html_text = soup.get_text()
+        time_match = re.search(r'(202\d[-\./年]\d{1,2}[-\./月]\d{1,2}日?(?:\s+\d{1,2}:\d{2})?)', html_text)
+        if time_match: pub_time_str = time_match.group(1)
+        
+    except Exception as e:
+        pass
+    return snippet, parse_publish_time(pub_time_str)
+
 # ==========================================
-# 🇨🇳 第二部分：国内权威站点抓取模板
+# 🤖 通用网站抓取器 (自动寻路逻辑)
 # ==========================================
-def fetch_cctv_news(limit=5):
-    """模板1：央视网抓取 (示例)"""
-    logging.info("开始抓取 [央视网] ...")
+def generic_news_fetcher(source_name, target_url, limit=3, timeout=10, must_contain_ai=False):
+    """通用的智能抓取函数，适用未知 HTML 结构的站点"""
+    logging.info(f"开始抓取 [{source_name}] ...")
     news_list = []
-    # 替换为真实的央视网 AI/科技 频道 URL
-    url = "https://news.cctv.com/tech/" 
+    ai_keywords = ["AI", "大模型", "人工智能", "算法", "GPT", "算力"]
     
     try:
-        response = requests.get(url, headers=get_random_headers(), timeout=10)
+        response = requests.get(target_url, headers=get_random_headers(), timeout=timeout)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # 占位：使用真实的 CSS 选择器
-        articles = soup.find_all('li', class_='news-item')[:limit] 
-        for art in articles:
-            # title = ...
-            # link = ...
-            # snippet = ...
-            # raw_time_str = art.find('span', class_='time').get_text(strip=True)
+        seen_urls = set()
+        count = 0
+        
+        # 寻找所有 a 标签
+        for a_tag in soup.find_all('a'):
+            if count >= limit: break
+            link = a_tag.get('href')
+            title = a_tag.get_text(strip=True)
             
-            # --- 模拟数据 ---
-            title = "央视网：中国大模型产业取得突破"
-            link = "https://news.cctv.com/demo1"
-            snippet = "今日科技部宣布..."
-            raw_time_str = "2小时前" 
-            # ----------------
+            # 基础过滤：标题太短、无链接、或者属于无关的导航链接
+            if not title or len(title) < 8 or not link or 'javascript' in link: continue
             
-            pub_time = parse_publish_time(raw_time_str)
+            # 如果要求必须包含 AI 关键词（比如针对财新网首页）
+            if must_contain_ai and not any(kw.lower() in title.lower() for kw in ai_keywords):
+                continue
+                
+            full_link = urljoin(target_url, link)
+            if full_link in seen_urls: continue
+            seen_urls.add(full_link)
+            
+            # 深入详情页抓取摘要和时间
+            snippet, pub_time = get_article_detail(full_link, timeout=timeout)
             
             news_list.append({
-                'source': '央视网',
+                'source': source_name,
                 'title': title,
-                'url': link,
+                'url': full_link,
                 'snippet': snippet,
-                'publish_time': pub_time # 存入 datetime 对象用于后续排序
+                'publish_time': pub_time
             })
+            count += 1
+            time.sleep(random.uniform(1.5, 3)) # 礼貌延时
+            
     except Exception as e:
-        logging.error(f"抓取 央视网 失败: {e}")
-    return news_list
-
-def fetch_caixin_news(limit=5):
-    """模板2：财新网抓取 (示例)"""
-    logging.info("开始抓取 [财新网] ...")
-    news_list = []
-    # 填入具体逻辑
+        logging.error(f"❌ 抓取 {source_name} 失败: {e}")
+        
     return news_list
 
 # ==========================================
-# 🌍 核心功能：海外站点严格熔断机制
+# 🇨🇳 新增的 5 个国内权威站点
 # ==========================================
-def fetch_mit_tech_review(limit=3):
+def fetch_pubscholar():
+    return generic_news_fetcher("科讯头条", "https://pubscholar.cn/headlines", limit=2)
+
+def fetch_cctv_ai():
+    return generic_news_fetcher("央视网·数智", "http://5gai.cctv.cn/h5/index.shtml", limit=2)
+
+def fetch_ccid():
+    return generic_news_fetcher("赛迪研究院", "https://www.ccidgroup.com/info/1155/43077.htm", limit=2)
+
+def fetch_caixin():
+    # 财新网内容庞杂，开启 must_contain_ai=True 进行过滤
+    return generic_news_fetcher("财新网", "https://www.caixin.com", limit=2, must_contain_ai=True)
+
+def fetch_tmtpost():
+    return generic_news_fetcher("钛媒体", "https://www.tmtpost.com/tag/topic/299106", limit=2)
+
+# ==========================================
+# 🌍 新增的 2 个海外站点 (严格熔断)
+# ==========================================
+def fetch_mit_tech_review():
     """海外站：MIT Technology Review (严格超时熔断)"""
-    logging.info("开始抓取海外源 [MIT Tech Review] ...")
-    news_list = []
-    url = "https://www.technologyreview.com/topic/artificial-intelligence/"
-    
     try:
-        # ⚠️ 核心要求：严格控制 8 秒超时
-        response = requests.get(url, headers=get_random_headers(), timeout=8)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # --- 模拟数据解析 ---
-        # TODO: 填入真实的解析逻辑
-        pub_time = parse_publish_time("2026-03-24 23:00") 
-        news_list.append({
-            'source': 'MIT Tech Review',
-            'title': "The next leap in GenAI architectures",
-            'url': "https://www.technologyreview.com/demo",
-            'snippet': "Researchers propose a new alternative to Transformers...",
-            'publish_time': pub_time
-        })
-        
+        return generic_news_fetcher("MIT Tech Review", "https://www.technologyreview.com/topic/artificial-intelligence/", limit=2, timeout=8)
     except requests.exceptions.Timeout:
-        logging.error("❌ 触发熔断：[MIT Tech Review] 请求超时 (>8秒)，自动切断防止阻塞。")
+        logging.error("❌ 触发熔断：[MIT Tech Review] 请求超时 (>8秒)")
         return []
-    except requests.exceptions.ConnectionError:
-        logging.error("❌ 触发熔断：[MIT Tech Review] 网络连接失败 (可能被墙)。")
+    except Exception:
         return []
-    except Exception as e:
-        logging.error(f"⚠️ [MIT Tech Review] 解析异常: {e}")
-        return []
-        
-    return news_list
 
-def fetch_venturebeat_news(limit=3):
+def fetch_venturebeat():
     """海外站：VentureBeat (严格超时熔断)"""
-    logging.info("开始抓取海外源 [VentureBeat] ...")
-    news_list = []
-    url = "https://venturebeat.com/category/ai/"
-    
     try:
-        # ⚠️ 核心要求：严格控制 8 秒超时
-        response = requests.get(url, headers=get_random_headers(), timeout=8)
-        response.raise_for_status()
-        
-        # --- 模拟数据解析 ---
-        # TODO: 填入真实的解析逻辑
-        
+        return generic_news_fetcher("VentureBeat", "https://venturebeat.com/category/ai/", limit=2, timeout=8)
     except requests.exceptions.Timeout:
-        logging.error("❌ 触发熔断：[VentureBeat] 请求超时 (>8秒)，放弃抓取。")
+        logging.error("❌ 触发熔断：[VentureBeat] 请求超时 (>8秒)")
         return []
-    except requests.exceptions.ConnectionError:
-        logging.error("❌ 触发熔断：[VentureBeat] 网络连接被拒。")
+    except Exception:
         return []
-    except Exception as e:
-        logging.error(f"⚠️ [VentureBeat] 解析异常: {e}")
-        return []
-        
-    return news_list
-
 
 # ==========================================
-# 🌟 第三部分：全局汇总与时间排序核心
+# 🏛️ 原有的 4 个经典站点 (简写调用)
+# ==========================================
+def fetch_arxiv_news(limit=2):
+    logging.info("开始抓取 [arXiv] ...")
+    news_list = []
+    try:
+        feed = feedparser.parse("http://export.arxiv.org/rss/cs.AI")
+        for entry in feed.entries[:limit]: 
+            pub_time = parse_publish_time(entry.get('published', ''))
+            news_list.append({
+                'source': 'arXiv', 'title': entry.get('title', ''), 'url': entry.get('link', ''),
+                'snippet': BeautifulSoup(entry.get('summary', ''), "html.parser").get_text(strip=True),
+                'publish_time': pub_time
+            })
+    except Exception as e: pass
+    return news_list
+
+def fetch_jiqizhixin(): return generic_news_fetcher("机器之心", "https://www.jiqizhixin.com", limit=2)
+def fetch_qbitai(): return generic_news_fetcher("量子位", "https://www.qbitai.com/", limit=2)
+def fetch_36kr(): return generic_news_fetcher("36Kr", "https://36kr.com/information/ai/", limit=2)
+
+# ==========================================
+# 🌟 全局汇总与时间排序核心
 # ==========================================
 def aggregate_news():
-    """
-    调度所有抓取函数，并基于提取的 publish_time 进行全局倒序排序。
-    """
-    logging.info("================ 开始执行核心新闻聚合管道 ================")
+    logging.info("================ 开始执行 11 站全量聚合 ==================")
     all_news = []
     
-    # 1. 串行执行各站点的抓取任务 (遇到海外超时会自动跳过，不阻塞主线程)
-    all_news.extend(fetch_cctv_news())
-    all_news.extend(fetch_caixin_news())
-    # ... 其他国内站点
+    # 1. 执行原有的 4 个站点
+    all_news.extend(fetch_arxiv_news())
+    all_news.extend(fetch_jiqizhixin())
+    all_news.extend(fetch_qbitai())
+    all_news.extend(fetch_36kr())
     
+    # 2. 执行新增的国内 5 个权威站点
+    all_news.extend(fetch_pubscholar())
+    all_news.extend(fetch_cctv_ai())
+    all_news.extend(fetch_ccid())
+    all_news.extend(fetch_caixin())
+    all_news.extend(fetch_tmtpost())
+    
+    # 3. 执行海外站点 (带有熔断机制，若超时会静默失败不影响大局)
     all_news.extend(fetch_mit_tech_review())
-    all_news.extend(fetch_venturebeat_news())
+    all_news.extend(fetch_venturebeat())
     
     if not all_news:
         logging.warning("本次运行未能抓取到任何新闻！")
         return []
         
-    logging.info(f"聚合完毕，初步获取 {len(all_news)} 条资讯，准备进行时间线排序...")
+    logging.info(f"全站聚合完毕，初步获取 {len(all_news)} 条资讯，准备进行时间排序...")
 
-    # 2. 核心：利用 Python 强大的 sort 方法，根据 datetime 对象倒序排列 (最新 -> 最旧)
+    # 核心：根据 datetime 对象倒序排列 (最新 -> 最旧)
     all_news.sort(key=lambda x: x['publish_time'], reverse=True)
     
-    # 3. 排序完成后，将 datetime 对象格式化为友好的字符串，以便 JSON 序列化和前端展示
+    # 将 datetime 对象格式化为字符串，方便保存 JSON
     for news in all_news:
         if isinstance(news['publish_time'], datetime):
             news['publish_time'] = news['publish_time'].strftime('%Y-%m-%d %H:%M')
 
-    logging.info(f"排序完成！最新一条新闻时间为: {all_news[0]['publish_time']}")
-    logging.info("================ 聚合管道执行完毕 ================")
-    
+    logging.info(f"排序完成！最新新闻时间为: {all_news[0]['publish_time']}")
     return all_news
 
 # ==========================================
@@ -245,8 +259,8 @@ if __name__ == "__main__":
     aggregated_results = aggregate_news()
     
     if aggregated_results:
-        logging.info("准备将排序好的资讯交由 AI 进行总结并保存...")
-        # 调用 AI 总结器，写入 daily_news.json
+        logging.info(f"准备将 {len(aggregated_results)} 条已排序资讯交由 AI 总结...")
+        # 调用大模型总结并保存
         process_and_save_news(aggregated_results, "daily_news.json")
     else:
         logging.warning("今天没有抓取到任何新闻，跳过 AI 总结步骤。")
