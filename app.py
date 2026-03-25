@@ -174,7 +174,7 @@ if st.sidebar.button("🔄 立即获取最新资讯"):
         
         # ⚠️ 注意：请把下面的 '你的用户名' 和 '你的仓库名' 替换成你真实的！
         # 比如：'zhangsan' 和 'NewsAggregator'
-        url = "https://api.github.com/repos/你的用户名/你的仓库名/actions/workflows/update_news.yml/dispatches"
+        url = "https://api.github.com/repos/JeffN129/ai-catcher/actions/workflows/update_news.yml/dispatches"
         
         # 尝试获取 GitHub Token
         github_token = os.environ.get("GITHUB_TOKEN", "")
