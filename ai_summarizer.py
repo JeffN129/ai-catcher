@@ -2,6 +2,7 @@ import json
 import time
 import requests
 import logging
+import os
 
 # 配置日志输出
 logging.basicConfig(
