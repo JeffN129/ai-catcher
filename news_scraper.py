@@ -144,7 +144,7 @@ def generic_news_fetcher(source_name, target_url, limit=3, timeout=10, must_cont
                 'title': title,
                 'url': full_link,
                 'snippet': snippet,
-                'publish_time': pub_time
+                'publish_time': pub_time,
                 'cover_image_url': cover_img
             })
             count += 1
