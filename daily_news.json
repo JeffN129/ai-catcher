@@ -1,0 +1,10 @@
+[
+    {
+        "source": "MIT Tech Review",
+        "title": "The next leap in GenAI architectures",
+        "url": "https://www.technologyreview.com/demo",
+        "snippet": "Researchers propose a new alternative to Transformers...",
+        "publish_time": "2026-03-24 23:00",
+        "ai_summary": "研究人员提出一种名为“Mamba”的新型神经网络架构，旨在替代Transformer模型。该架构通过选择性状态空间模型显著提升了长序列数据处理效率，在语言建模等任务中展现出更优的运算性能与扩展潜力。"
+    }
+]
