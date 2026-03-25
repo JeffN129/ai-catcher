@@ -162,11 +162,18 @@ def fetch_qbitai_news(limit=5):
     return news_list
 
 def fetch_36kr_news(limit=5):
-    """4. 抓取 36Kr (带有强化容错机制)"""
+    """
+    4. 抓取 36Kr (带有强化容错和AI关键词过滤机制)
+    """
     logging.info("开始抓取 36Kr ...")
     news_list = []
-    target_url = "https://36kr.com/information/technology/"
+    
+    # 🌟 方案一：更换更精准的源头 URL
+    target_url = "https://36kr.com/information/ai/" # 改为 36Kr AI 专属频道
     base_url = "https://36kr.com"
+    
+    # 🛡️ 方案二：关键词白名单拦截
+    ai_keywords = ["AI", "大模型", "人工智能", "芯片", "算力", "GPT", "DeepMind", "机器人", "算法", "自动驾驶"]
     
     try:
         response = requests.get(target_url, headers=get_random_headers(), timeout=10)
@@ -180,8 +187,23 @@ def fetch_36kr_news(limit=5):
         for a_tag in article_links:
             if count >= limit: break
             link = a_tag.get('href')
+            
+            # 🌟 就是这一行提取了标题！
             title = a_tag.get_text(strip=True)
             
+            # ==========================================
+            # 🛡️ 【新增拦截逻辑】：关键词过滤
+            # ==========================================
+            # 检查标题（忽略大小写）是否包含白名单中的任意一个词
+            is_ai_related = any(keyword.lower() in title.lower() for keyword in ai_keywords)
+
+            if not is_ai_related:
+                # 如果标题里没有这些词，直接跳过这篇文章，去抓下一篇
+                # 我们打印一条日志，方便在 Actions 里查看过滤效果
+                logging.info(f"  -> [过滤] 标题未匹配到AI关键词，跳过: {title}")
+                continue
+            # ==========================================
+
             if not title or len(title) < 6: continue
             if link.startswith('/'): link = base_url + link
             if link in seen_urls: continue
@@ -212,7 +234,6 @@ def fetch_36kr_news(limit=5):
         return []
         
     return news_list
-
 # ==========================================
 # 🚀 主调度函数
 # ==========================================
