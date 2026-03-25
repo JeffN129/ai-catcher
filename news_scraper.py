@@ -5,6 +5,7 @@ import time
 import random
 import re
 from datetime import datetime, timedelta
+from ai_summarizer import process_and_save_news  
 
 # ==========================================
 # ⚙️ 基础配置与日志
@@ -238,10 +239,14 @@ def aggregate_news():
     return all_news
 
 # ==========================================
-# 启动入口
+# 🚀 真实的生产启动入口
 # ==========================================
 if __name__ == "__main__":
-    # 为了测试，这里直接打印结果。实际项目中请传入 ai_summarizer
-    results = aggregate_news()
-    for idx, item in enumerate(results):
-        print(f"[{idx+1}] {item['publish_time']} | {item['source']} | {item['title']}")
+    aggregated_results = aggregate_news()
+    
+    if aggregated_results:
+        logging.info("准备将排序好的资讯交由 AI 进行总结并保存...")
+        # 调用 AI 总结器，写入 daily_news.json
+        process_and_save_news(aggregated_results, "daily_news.json")
+    else:
+        logging.warning("今天没有抓取到任何新闻，跳过 AI 总结步骤。")
