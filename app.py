@@ -164,7 +164,42 @@ def explain_ai_term(term):
     except Exception as e:
         return f"查询失败，请检查网络或配置。错误详情：{str(e)}"
 
-
+# ==========================================
+# 🚀 新增功能：一键强制云端更新
+# ==========================================
+st.sidebar.markdown("### ⚡ 实时抓取")
+if st.sidebar.button("🔄 立即获取最新资讯"):
+    with st.sidebar.status("正在唤醒云端爬虫...", expanded=True) as status:
+        st.write("发送指令到 GitHub...")
+        
+        # ⚠️ 注意：请把下面的 '你的用户名' 和 '你的仓库名' 替换成你真实的！
+        # 比如：'zhangsan' 和 'NewsAggregator'
+        url = "https://api.github.com/repos/你的用户名/你的仓库名/actions/workflows/update_news.yml/dispatches"
+        
+        # 尝试获取 GitHub Token
+        github_token = os.environ.get("GITHUB_TOKEN", "")
+        if not github_token:
+            status.update(label="缺少 GITHUB_TOKEN 配置！", state="error")
+            st.sidebar.error("请先在 Streamlit Secrets 中配置 GITHUB_TOKEN")
+        else:
+            headers = {
+                "Accept": "application/vnd.github.v3+json",
+                "Authorization": f"Bearer {github_token}"
+            }
+            data = {"ref": "main"}
+            
+            try:
+                # 触发 GitHub Actions
+                response = requests.post(url, headers=headers, json=data)
+                if response.status_code == 204:
+                    status.update(label="指令发送成功！", state="complete")
+                    st.sidebar.success("✅ 后台爬虫已启动！\n\n爬取和 AI 总结大约需要 1~2 分钟，请稍后手动刷新本网页。")
+                else:
+                    status.update(label="触发失败", state="error")
+                    st.sidebar.error(f"错误码: {response.status_code}\n信息: {response.text}")
+            except Exception as e:
+                status.update(label="网络请求失败", state="error")
+                st.sidebar.error(f"报错: {str(e)}")
 # ==========================================
 # 📺 侧边栏：AI 词典与频道过滤
 # ==========================================
