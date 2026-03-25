@@ -14,7 +14,7 @@ logging.basicConfig(
 # ⚙️ API 配置区域 (请在此处填入你的配置)
 # ==========================================
 # 改为 DeepSeek 的接口配置
-os.environ.get("DEEPSEEK_API_KEY")
+API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 API_URL = "https://api.deepseek.com/chat/completions"
 MODEL_NAME = "deepseek-chat" # DeepSeek 的默认对话模型
 
