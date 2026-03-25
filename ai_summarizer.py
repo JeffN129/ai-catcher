@@ -84,36 +84,58 @@ def generate_ai_summary(text, max_retries=3):
 
 def process_and_save_news(news_list, output_file="daily_news.json"):
     """
-    接收新闻列表，逐条调用 API 生成总结，并将最终结果保存为本地 JSON 文件。
-
-    :param news_list: 包含字典的列表（前面爬虫的输出）
-    :param output_file: 保存的文件名
+    接收新闻列表，过滤掉历史已存在的数据，逐条调用 API 生成总结，
+    并将新数据与历史数据合并后写回本地 JSON 文件。
     """
-    logging.info(f"开始处理 AI 总结任务，共 {len(news_list)} 条数据...")
+    logging.info(f"开始处理 AI 总结任务，本次抓取共 {len(news_list)} 条源数据...")
+    
+    # 1. 尝试读取历史数据
+    historical_data = []
+    if os.path.exists(output_file):
+        try:
+            with open(output_file, 'r', encoding='utf-8') as f:
+                historical_data = json.load(f)
+            logging.info(f"成功读取历史记录，当前本地已有 {len(historical_data)} 条资讯。")
+        except Exception as e:
+            logging.error(f"读取历史文件失败: {e}，将作为全新文件处理。")
+            historical_data = []
 
+    # 2. 提取历史数据中所有的 URL，构建集合（Set），用于极速去重校验
+    existing_urls = {item.get('url') for item in historical_data if item.get('url')}
+    
     processed_news = []
-
+    
+    # 3. 遍历本次抓取的新闻
     for i, news in enumerate(news_list):
-        logging.info(f"正在处理 [{i + 1}/{len(news_list)}]: {news['title']}")
-
-        # 调用生成函数
+        news_url = news.get('url')
+        
+        # 【核心逻辑】：基于 URL 去重
+        if news_url in existing_urls:
+            logging.info(f"  -> [跳过] 该资讯已存在于历史记录中: {news.get('title')}")
+            continue
+            
+        logging.info(f"正在处理新增资讯 [{len(processed_news)+1}]: {news.get('title')}")
+        
+        # 调用大模型生成总结 (假设 generate_ai_summary 已在上方定义)
         summary = generate_ai_summary(news['snippet'])
-
+        
         # 将生成的总结塞回原有的字典中
         news['ai_summary'] = summary
         processed_news.append(news)
-
-        # 成功处理一条后，强制延时 1-2 秒，防止请求过快触发 API 的 QPS 限制 (Rate Limit)
-        time.sleep(1.5)
-
-        # 将包含 AI 总结的新数据保存为 JSON 文件
-    try:
-        # ensure_ascii=False 保证中文正常显示，不变成 \uXXXX
-        # indent=4 让 JSON 文件内容具有良好的缩进和可读性
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(processed_news, f, ensure_ascii=False, indent=4)
-        logging.info(f"🎉 处理完成！所有数据已成功保存至本地文件: {output_file}")
-    except Exception as e:
-        logging.error(f"保存 JSON 文件失败: {e}")
-
-
+        
+        # 成功处理一条后，强制延时，防止请求过快触发 API 限制
+        time.sleep(1.5) 
+        
+    # 4. 合并数据：将最新处理的新闻放在列表最前面，历史数据放在后面
+    final_data = processed_news + historical_data
+    
+    # 5. 将全量合并后的数据写回 JSON 文件
+    if processed_news:
+        try:
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(final_data, f, ensure_ascii=False, indent=4)
+            logging.info(f"🎉 处理完成！本次新增 {len(processed_news)} 条，总数据量累计达到: {len(final_data)} 条。")
+        except Exception as e:
+            logging.error(f"保存 JSON 文件失败: {e}")
+    else:
+        logging.info("🎉 本次运行没有发现新资讯，历史文件保持不变。")
