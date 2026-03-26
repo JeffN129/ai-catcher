@@ -1,5 +1,21 @@
 [
     {
+        "source": "arXiv",
+        "title": "Environment Maps: Structured Environmental Representations for Long-Horizon Agents",
+        "url": "https://arxiv.org/abs/2603.23610",
+        "snippet": "arXiv:2603.23610v1 Announce Type: new \nAbstract: Although large language models (LLMs) have advanced rapidly, robust automation of complex software workflows remains an open problem. In long-horizon settings, agents frequently suffer from cascading errors and environmental stochasticity; a single misstep in a dynamic interface can lead to task failure, resulting in hallucinations or trial-and-error. This paper introduces $\\textit{Environment Maps}$: a persistent, agent-agnostic representation that mitigates these failures by consolidating heterogeneous evidence, such as screen recordings and execution traces, into a structured graph. The representation consists of four core components: (1) Contexts (abstracted locations), (2) Actions (parameterized affordances), (3) Workflows (observed trajectories), and (4) Tacit Knowledge (domain definitions and reusable procedures). We evaluate this framework on the WebArena benchmark across five domains. Agents equipped with environment maps achieve a 28.2% success rate, nearly doubling the performance of baselines limited to session-bound context (14.2%) and outperforming agents that have access to the raw trajectory data used to generate the environment maps (23.3%). By providing a structured interface between the model and the environment, Environment Maps establish a persistent foundation for long-horizon planning that is human-interpretable, editable, and incrementally refinable.",
+        "publish_time": "2026-03-26 05:52",
+        "ai_summary": "针对大语言模型在复杂软件工作流自动化中易受级联错误和环境随机性影响的问题，一项新研究提出了“环境地图”框架。该框架通过整合屏幕录像、执行轨迹等异构证据，构建包含上下文、动作、工作流和隐性知识的结构化图表示。在WebArena基准测试中，使用该框架的智能体任务成功率提升至28.2%，显著优于基线方法。"
+    },
+    {
+        "source": "arXiv",
+        "title": "PLDR-LLMs Reason At Self-Organized Criticality",
+        "url": "https://arxiv.org/abs/2603.23539",
+        "snippet": "arXiv:2603.23539v1 Announce Type: new \nAbstract: We show that PLDR-LLMs pretrained at self-organized criticality exhibit reasoning at inference time. The characteristics of PLDR-LLM deductive outputs at criticality is similar to second-order phase transitions. At criticality, the correlation length diverges, and the deductive outputs attain a metastable steady state. The steady state behaviour suggests that deductive outputs learn representations equivalent to scaling functions, universality classes and renormalization groups from the training dataset, leading to generalization and reasoning capabilities in the process. We can then define an order parameter from the global statistics of the model's deductive output parameters at inference. The reasoning capabilities of a PLDR-LLM is better when its order parameter is close to zero at criticality. This observation is supported by the benchmark scores of the models trained at near-criticality and sub-criticality. Our results provide a self-contained explanation on how reasoning manifests in large language models, and the ability to reason can be quantified solely from global model parameter values of the deductive outputs at steady state, without any need for evaluation of curated benchmark datasets through inductive output for reasoning and comprehension.",
+        "publish_time": "2026-03-26 05:52",
+        "ai_summary": "研究发现，在自组织临界状态下预训练的PLDR-LLM模型展现出推理能力。其演绎输出在临界点表现出类似二阶相变的特性，相关长度发散并达到亚稳态。这种稳态行为表明模型从训练数据中学习了与标度函数、普适类和重整化群等价的表示，从而获得泛化与推理能力。研究通过模型演绎输出的全局统计量定义序参量，当序参量接近零时模型推理能力更优，该结论得到了近临界与亚临界训练模型的基准测试支持。"
+    },
+    {
         "source": "央视网·数智",
         "title": "AI驱动未来出行新模式 智能出行正在走进更多生活场景",
         "url": "https://tv.cctv.com/2026/03/21/VIDEIVtDYztVZZgyO9d7paRP260321.shtml",
