@@ -43,71 +43,85 @@ WEBSITE_PLACEHOLDERS = {
 }
 
 # ==========================================
-# 💅 深度定制的 CSS 样式 (终极修复版)
+# 💅 深度定制的 CSS 样式 (终极 Flexbox 修复版)
 # ==========================================
 st.markdown("""
 <style>
     #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
     
-    /* === 🌟 终极搜索框魔法：强制绑定容器 === */
-    /* 1. 让 Form 整体透明，去掉默认边框 */
+    /* === 🌟 终极搜索框魔法：Flexbox 容器伪装术 === */
+    /* 1. 消除 Form 外围默认样式 */
     div[data-testid="stForm"] { 
         border: none !important; 
+        background: transparent !important; 
         padding: 0 !important; 
-        background-color: transparent !important; 
     }
     
-    /* 2. 【核心修复】将 Form 内部的容器设为 Relative，作为星星的“牢笼” */
+    /* 2. 【核心重构】将 Form 的内部容器变成一个【水平排布】的大药丸（模拟输入框） */
     div[data-testid="stForm"] > div:first-child {
-        position: relative !important;
-        z-index: 1 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 40px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+        padding: 4px 12px 4px 24px !important;
+        gap: 8px !important;
+    }
+    /* 输入框获得焦点时，整个大药丸亮起蓝边 */
+    div[data-testid="stForm"] > div:first-child:focus-within {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
     }
     
-    /* 3. 输入框本体：加大圆角，右侧留白 65px 防止文字被星星遮挡 */
-    div[data-testid="stForm"] [data-testid="stTextInput"] input { 
-        border-radius: 40px !important; 
-        padding: 0 65px 0 25px !important; 
-        height: 60px !important; 
+    /* 3. 剥夺原生输入框的所有边框和背景，让它溶入大药丸 */
+    div[data-testid="stForm"] div[data-testid="stTextInput"] { 
+        flex-grow: 1 !important; 
+        margin: 0 !important; 
+    }
+    div[data-testid="stForm"] div[data-testid="stTextInput"] input { 
+        border: none !important; 
+        box-shadow: none !important; 
+        background: transparent !important; 
         font-size: 1.15rem !important; 
-        border: 1px solid #e2e8f0 !important; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; 
-        background-color: #ffffff !important; 
-        width: 100% !important; 
+        padding: 0 !important; 
+        height: 50px !important; 
+        color: #1e293b !important;
     }
-    div[data-testid="stForm"] [data-testid="stTextInput"] input:focus { 
-        border-color: #3b82f6 !important; 
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important; 
+    div[data-testid="stForm"] div[data-testid="stTextInput"] input:focus { 
+        box-shadow: none !important; 
+        border: none !important;
     }
     
-    /* 4. 星星按钮定位：绝对吸附在容器的右侧偏上 */
-    div[data-testid="stForm"] [data-testid="stFormSubmitButton"] { 
-        position: absolute !important; 
-        right: 8px !important; 
-        top: 6px !important; 
+    /* 4. 星星按钮：取消背景和边框，作为同行元素紧贴右侧 */
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] { 
         margin: 0 !important; 
         padding: 0 !important;
-        z-index: 10 !important; 
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
-    
-    /* 5. 星星外观：完美的圆形和微发光感 */
-    div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button { 
-        border-radius: 50% !important; 
-        font-size: 1.5rem !important; 
-        background-color: transparent !important; 
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button { 
         border: none !important; 
+        background: transparent !important; 
+        box-shadow: none !important; 
+        font-size: 1.6rem !important; 
         color: #f59e0b !important; 
         width: 48px !important;
         height: 48px !important;
+        border-radius: 50% !important;
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
-        transition: all 0.2s ease !important; 
-        box-shadow: none !important;
+        transition: transform 0.2s ease, background-color 0.2s ease !important; 
+        padding: 0 !important;
+        line-height: 1 !important;
     }
-    div[data-testid="stForm"] [data-testid="stFormSubmitButton"] button:hover { 
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover { 
+        transform: scale(1.15) !important; 
         color: #d97706 !important; 
-        background-color: #fef3c7 !important; 
-        transform: scale(1.05) !important; 
+        background-color: #fffbeb !important; 
     }
 
     /* === 卡片瀑布流基础样式 === */
