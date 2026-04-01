@@ -43,17 +43,73 @@ WEBSITE_PLACEHOLDERS = {
 }
 
 # ==========================================
-# 💅 深度定制的 CSS 样式
+# 💅 深度定制的 CSS 样式 (终极融合版搜索框)
 # ==========================================
 st.markdown("""
 <style>
     #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
-    div[data-testid="stForm"] { position: relative; border: none !important; padding: 0 !important; background-color: transparent !important; }
-    div[data-testid="stTextInput"] input { border-radius: 40px !important; padding: 22px 70px 22px 28px !important; font-size: 1.25rem !important; border: 1px solid #e0e0e0 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important; background-color: #ffffff; width: 100%; }
-    div[data-testid="stTextInput"] input:focus { border-color: #3b82f6 !important; box-shadow: 0 6px 16px rgba(59, 130, 246, 0.15) !important; }
-    div[data-testid="stFormSubmitButton"] { position: absolute; right: 12px; top: 24px; z-index: 10; width: auto !important; }
-    div[data-testid="stFormSubmitButton"] button { border-radius: 50% !important; font-size: 1.8rem !important; background-color: transparent !important; border: none !important; box-shadow: none !important; color: #f59e0b !important; padding: 0 !important; transition: all 0.2s ease; line-height: 1 !important; }
-    div[data-testid="stFormSubmitButton"] button:hover { transform: scale(1.15) rotate(5deg); color: #d97706 !important; background-color: transparent !important; }
+    
+    /* === 🌟 终极搜索框融合魔法 === */
+    /* 1. 取消表单默认的边框，并将其设为定位基准 */
+    [data-testid="stForm"] { 
+        position: relative !important; 
+        border: none !important; 
+        padding: 0 !important; 
+        background-color: transparent !important; 
+    }
+    
+    /* 2. 输入框本体：固定高度，右侧强行留出空间给星星按钮 */
+    [data-testid="stForm"] [data-testid="stTextInput"] input { 
+        border-radius: 40px !important; 
+        padding: 0 70px 0 28px !important; /* 右侧留70px */
+        height: 70px !important; 
+        font-size: 1.25rem !important; 
+        border: 1px solid #e0e0e0 !important; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important; 
+        background-color: #ffffff !important; 
+        width: 100% !important; 
+    }
+    [data-testid="stForm"] [data-testid="stTextInput"] input:focus { 
+        border-color: #3b82f6 !important; 
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.15) !important; 
+    }
+    
+    /* 3. 提交按钮容器：绝对定位，使用 translateY 完美居中 */
+    [data-testid="stForm"] [data-testid="stFormSubmitButton"] { 
+        position: absolute !important; 
+        right: 8px !important; 
+        top: 50% !important; 
+        transform: translateY(-50%) !important; 
+        margin: 0 !important; 
+        padding: 0 !important;
+        z-index: 10 !important; 
+    }
+    
+    /* 4. 星星按钮本体：无边框透明化，带呼吸和微光特效 */
+    [data-testid="stForm"] [data-testid="stFormSubmitButton"] button { 
+        border-radius: 50% !important; 
+        font-size: 1.8rem !important; 
+        background-color: transparent !important; 
+        border: none !important; 
+        box-shadow: none !important; 
+        color: #f59e0b !important; 
+        width: 54px !important;
+        height: 54px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        transition: all 0.2s ease !important; 
+    }
+    [data-testid="stForm"] [data-testid="stFormSubmitButton"] button:hover { 
+        color: #d97706 !important; 
+        background-color: #fffbeb !important; 
+        transform: scale(1.1) !important; 
+    }
+    
+    /* 清除 Streamlit 多余的间距 */
+    [data-testid="stForm"] > div { gap: 0 !important; }
+
+    /* 卡片瀑布流样式 */
     .news-card { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s ease; margin-bottom: 24px; overflow: hidden; border: 1px solid #f0f0f0; display: flex; flex-direction: column; height: 100%; }
     .news-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
     .card-thumbnail { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-color: #f8f9fa; position: relative; }
@@ -68,7 +124,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 🚀 全局侧边栏 (守护你的 AI 词典)
+# 🚀 全局侧边栏 (坚定守护你的 AI 词典)
 # ==========================================
 st.sidebar.title("🚀 工具箱")
 st.sidebar.markdown("### 📖 随身 AI 词典")
