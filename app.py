@@ -2,6 +2,8 @@ import streamlit as st
 import json
 import os
 import requests
+import hashlib
+from datetime import datetime, timedelta
 from duckduckgo_search import DDGS
 
 # ==========================================
@@ -37,7 +39,7 @@ WEBSITE_PLACEHOLDERS = {
     "钛媒体": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop",
     "MIT Tech Review": "https://images.unsplash.com/photo-1507146153580-69a1fe6d8aa1?q=80&w=800&auto=format&fit=crop",
     "VentureBeat": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop",
-    "权威源检索": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop"
+    "全网检索": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop"
 }
 
 # ==========================================
@@ -46,39 +48,12 @@ WEBSITE_PLACEHOLDERS = {
 st.markdown("""
 <style>
     #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
-    
-    /* 🌟 表单透明化，去除 Streamlit 默认的框 */
-    div[data-testid="stForm"] { border: none !important; padding: 0 !important; background-color: transparent !important; }
-    
-    /* 🌟 大号搜索框优化 - 更圆润，更像 Google/Gemini */
-    div[data-testid="stTextInput"] input { 
-        border-radius: 30px !important; 
-        padding: 22px 24px !important; 
-        font-size: 1.25rem !important; 
-        border: 1px solid #e0e0e0 !important; 
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; 
-        background-color: #ffffff; 
-    }
+    div[data-testid="stForm"] { position: relative; border: none !important; padding: 0 !important; background-color: transparent !important; }
+    div[data-testid="stTextInput"] input { border-radius: 40px !important; padding: 22px 70px 22px 28px !important; font-size: 1.25rem !important; border: 1px solid #e0e0e0 !important; box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important; background-color: #ffffff; width: 100%; }
     div[data-testid="stTextInput"] input:focus { border-color: #3b82f6 !important; box-shadow: 0 6px 16px rgba(59, 130, 246, 0.15) !important; }
-    
-    /* 🌟 Gemini 同款图标按钮专属样式 */
-    div[data-testid="stFormSubmitButton"] button {
-        height: 70px !important; 
-        border-radius: 30px !important;
-        font-size: 2rem !important;
-        background-color: transparent !important;
-        border: 1px solid #e0e0e0 !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-        color: #4a90e2 !important; /* 图标颜色 */
-        transition: all 0.2s ease;
-    }
-    div[data-testid="stFormSubmitButton"] button:hover {
-        border-color: #3b82f6 !important;
-        background-color: #f8fafc !important; 
-        transform: scale(1.02);
-    }
-
-    /* 卡片瀑布流样式 */
+    div[data-testid="stFormSubmitButton"] { position: absolute; right: 12px; top: 24px; z-index: 10; width: auto !important; }
+    div[data-testid="stFormSubmitButton"] button { border-radius: 50% !important; font-size: 1.8rem !important; background-color: transparent !important; border: none !important; box-shadow: none !important; color: #f59e0b !important; padding: 0 !important; transition: all 0.2s ease; line-height: 1 !important; }
+    div[data-testid="stFormSubmitButton"] button:hover { transform: scale(1.15) rotate(5deg); color: #d97706 !important; background-color: transparent !important; }
     .news-card { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s ease; margin-bottom: 24px; overflow: hidden; border: 1px solid #f0f0f0; display: flex; flex-direction: column; height: 100%; }
     .news-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
     .card-thumbnail { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-color: #f8f9fa; position: relative; }
@@ -93,40 +68,41 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 🚀 侧边栏 (已深度精简，仅保留词典)
+# 🚀 全局侧边栏 (守护你的 AI 词典)
 # ==========================================
 st.sidebar.title("🚀 工具箱")
 st.sidebar.markdown("### 📖 随身 AI 词典")
-search_term = st.sidebar.text_input("输入专业术语 (例如：MoE架构, 算力)：")
+st.sidebar.caption("遇到生僻的 AI 术语？随时在此查阅。")
+
+search_term = st.sidebar.text_input("输入专业术语 (如：MoE, 算力)：", key="dictionary_input")
 if st.sidebar.button("🧠 帮我解释", use_container_width=True):
-    if not search_term: st.sidebar.warning("请输入需要查询的词汇哦。")
+    if not search_term: 
+        st.sidebar.warning("请输入需要查询的词汇哦。")
     else:
         api_key = os.environ.get("DEEPSEEK_API_KEY", "")
-        if not api_key: st.sidebar.error("缺少 DEEPSEEK_API_KEY，无法调用大模型。")
+        if not api_key: 
+            st.sidebar.error("缺少 DEEPSEEK_API_KEY，无法调用大模型。")
         else:
             with st.sidebar.spinner(f"正在查阅 {search_term} ..."):
                 try:
                     api_url = "https://api.deepseek.com/chat/completions"
                     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-                    payload = {"model": "deepseek-chat", "messages": [{"role": "system", "content": "你是一个资深的 AI 领域科普专家。请在100字内解释AI术语。"}, {"role": "user", "content": f"请解释：{search_term}"}]}
+                    payload = {"model": "deepseek-chat", "messages": [{"role": "system", "content": "你是一个资深的 AI 领域科普专家。请在100字内通俗解释AI术语。"}, {"role": "user", "content": f"请解释：{search_term}"}]}
                     resp = requests.post(api_url, headers=headers, json=payload, timeout=15)
                     resp.raise_for_status()
                     st.sidebar.success(resp.json()['choices'][0]['message']['content'])
-                except Exception as e: st.sidebar.error(f"查询失败：{e}")
+                except Exception as e: 
+                    st.sidebar.error(f"查询失败：{e}")
 
 # ==========================================
 # ⚙️ 核心逻辑：后台更新唤醒器
 # ==========================================
 def trigger_github_update():
-    """静默唤醒 GitHub Actions 去抓取最新数据"""
     url = "https://api.github.com/repos/JeffN129/ai-catcher/actions/workflows/update_news.yml/dispatches"
     github_token = os.environ.get("GITHUB_TOKEN", "")
     if github_token:
-        headers = {"Accept": "application/vnd.github.v3+json", "Authorization": f"Bearer {github_token}"}
-        try:
-            requests.post(url, headers=headers, json={"ref": "main"})
-        except Exception:
-            pass # 后台静默执行，即便失败也不打断用户体验
+        try: requests.post(url, headers={"Accept": "application/vnd.github.v3+json", "Authorization": f"Bearer {github_token}"}, json={"ref": "main"})
+        except: pass 
 
 # ==========================================
 # ⚙️ 核心逻辑：执行检索与状态切换
@@ -134,16 +110,54 @@ def trigger_github_update():
 def execute_search(search_type="custom", keyword=""):
     if search_type == "latest":
         DATA_FILE = "daily_news.json"
+        filtered_results = []
         if os.path.exists(DATA_FILE):
-            with open(DATA_FILE, "r", encoding="utf-8") as f:
-                st.session_state.search_results = json.load(f)
+            try:
+                with open(DATA_FILE, "r", encoding="utf-8") as f:
+                    all_news = json.load(f)
+                
+                now = datetime.now()
+                for item in all_news:
+                    time_str = item.get('publish_time', '')
+                    try:
+                        # 尝试解析真实时间
+                        pub_time = datetime.strptime(time_str, '%Y-%m-%d %H:%M')
+                        days_old = (now - pub_time).days
+                    except:
+                        days_old = 3 # 容错：如果时间解析失败，默认当做3天前的数据
+                    
+                    # 🌟 核心过滤：只展示最近 14 天的资讯
+                    if days_old <= 14:
+                        # 🌟 核心算法：计算热度 (Heat Score)
+                        heat = 60 + max(0, (14 - days_old) * 2) # 基础分 + 时间分(越新分越高)
+                        
+                        # 关键词爆点加分
+                        title_upper = item.get('title', '').upper()
+                        hot_words = ['SORA', 'GPT', '大模型', 'OPENAI', '芯片', 'NVIDIA', '英伟达', 'AGI']
+                        if any(w in title_upper for w in hot_words):
+                            heat += 15
+                        
+                        # 利用 url 的 Hash 产生一个稳定的 0-15 随机附加分，让热度更真实
+                        url_hash = int(hashlib.md5(item.get('url', '').encode()).hexdigest()[:4], 16)
+                        heat += (url_hash % 16)
+                        
+                        item['heat_score'] = min(99, heat) # 封顶 99 分
+                        filtered_results.append(item)
+                        
+                # 按照热度分数倒序排列
+                filtered_results.sort(key=lambda x: x.get('heat_score', 0), reverse=True)
+                st.session_state.search_results = filtered_results
+                
+            except Exception as e:
+                st.error(f"读取数据失败: {e}")
         else:
             st.session_state.search_results = []
-        st.session_state.query_display = "📰 今日 AI 聚合动态"
+            
+        st.session_state.query_display = "🔥 近两周 AI 热门风向标"
         st.session_state.page = "results"
         
     elif search_type == "custom" and keyword.strip():
-        with st.spinner(f"正在专属信息源中定向检索：{keyword} ..."):
+        with st.spinner(f"正在全网深潜检索：{keyword} ..."):
             DOMAIN_TO_NAME = {
                 "arxiv.org": "arXiv", "jiqizhixin.com": "机器之心", "qbitai.com": "量子位",
                 "36kr.com": "36Kr", "pubscholar.cn": "科讯头条", "cctv.com": "央视网·数智",
@@ -153,27 +167,38 @@ def execute_search(search_type="custom", keyword=""):
             sites_query = " OR ".join([f"site:{domain}" for domain in DOMAIN_TO_NAME.keys()])
             formatted_query = f"{keyword} ({sites_query})"
             
+            raw_results = None
+            # 🌟 智能兜底机制：优先查权威源，查不到则回退到全网查询
             try:
                 raw_results = DDGS().text(keywords=formatted_query, max_results=9)
-                adapted_results = []
-                if raw_results:
-                    for item in raw_results:
-                        href = item.get('href', '')
-                        source_name = "权威源检索"
-                        for domain, name in DOMAIN_TO_NAME.items():
-                            if domain in href:
-                                source_name = name
-                                break
-                                
-                        adapted_results.append({
-                            'source': source_name, 'title': item.get('title', '无标题'), 'url': href,
-                            'snippet': item.get('body', '暂无内容'), 'publish_time': '全网搜索归档', 'cover_image_url': None
-                        })
-                st.session_state.search_results = adapted_results
-                st.session_state.query_display = f"🔍 专属源检索结果：{keyword}"
-                st.session_state.page = "results"
-            except Exception as e:
-                st.error(f"网络检索接口受限，请稍后再试。报错详情: {e}")
+                if not raw_results: raise ValueError("Empty")
+            except Exception:
+                # 触发全网搜索回退
+                try:
+                    fallback_query = f"{keyword} AI 资讯"
+                    raw_results = DDGS().text(keywords=fallback_query, max_results=9)
+                    if raw_results:
+                        st.toast("专属信息源暂无匹配，已为您智能扩展至全网检索", icon="🔍")
+                except Exception as e:
+                    st.error(f"网络检索接口受限，请稍后再试。报错详情: {e}")
+            
+            adapted_results = []
+            if raw_results:
+                for item in raw_results:
+                    href = item.get('href', '')
+                    source_name = "全网检索"
+                    for domain, name in DOMAIN_TO_NAME.items():
+                        if domain in href:
+                            source_name = name
+                            break
+                            
+                    adapted_results.append({
+                        'source': source_name, 'title': item.get('title', '无标题'), 'url': href,
+                        'snippet': item.get('body', '暂无内容'), 'publish_time': '全网搜索归档', 'cover_image_url': None
+                    })
+            st.session_state.search_results = adapted_results
+            st.session_state.query_display = f"🔍 智能检索结果：{keyword}"
+            st.session_state.page = "results"
 
 def return_home():
     st.session_state.page = "home"
@@ -186,16 +211,10 @@ if st.session_state.page == 'home':
     st.markdown("<h1 style='text-align: center; font-size: 3rem; color: #1f2937; margin-bottom: 20px;'>🐋 今天有什么关于 AI 的问题可以帮到你？</h1>", unsafe_allow_html=True)
     
     col_left, col_main, col_right = st.columns([1, 2, 1])
-    
     with col_main:
         with st.form(key='search_form'):
-            # 88% 给输入框，12% 给按钮，比例更协调
-            input_col, btn_col = st.columns([88, 12])
-            with input_col:
-                user_input = st.text_input("搜索", placeholder="搜索专属信息源的最新资讯...", label_visibility="collapsed")
-            with btn_col:
-                # 🌟 改为 Gemini 标志性的“星芒”图标
-                submit_search = st.form_submit_button("✨", use_container_width=True)
+            user_input = st.text_input("搜索", placeholder="搜索专属信息源的最新资讯...", label_visibility="collapsed")
+            submit_search = st.form_submit_button("✨")
             
             if submit_search:
                 if user_input:
@@ -204,15 +223,13 @@ if st.session_state.page == 'home':
                 else:
                     st.warning("请先输入你想检索的关键词哦！")
         
-        # 🌟 核心排版：利用空列居中“最新动态”按钮，缩小其宽度
         st.markdown("<br>", unsafe_allow_html=True)
-        _, center_btn_col, _ = st.columns([1.5, 2, 1.5])
+        _, center_btn_col, _ = st.columns([1.2, 1.5, 1.2]) 
         with center_btn_col:
             if st.button("📰 看看最新动态", use_container_width=True):
-                # 隐藏式合并：点击的同时，悄悄唤醒后台爬虫去抓最新数据
                 trigger_github_update()
                 execute_search("latest")
-                st.session_state.show_update_toast = True # 标记需要弹出提示
+                st.session_state.show_update_toast = True 
                 st.rerun()
                 
     st.markdown("<br><br><br><br><p style='text-align:center; color:#9ca3af; font-size:0.9rem;'>Powered by DuckDuckGo & DeepSeek · 数据抓取自 11 个全球顶尖源流</p>", unsafe_allow_html=True)
@@ -222,7 +239,6 @@ if st.session_state.page == 'home':
 # ==========================================
 elif st.session_state.page == 'results':
     
-    # 如果是由“最新动态”跳转过来的，弹出巧妙的后台抓取提示
     if st.session_state.show_update_toast:
         st.toast("✅ 后台云端爬虫已唤醒！最新资讯将在 1~2 分钟后静默就绪。", icon="🚀")
         st.session_state.show_update_toast = False
@@ -254,6 +270,9 @@ elif st.session_state.page == 'results':
                     time_str = article.get('publish_time', '最近')
                     snippet = article.get('ai_summary') or article.get('snippet', '无摘要内容')
                     
+                    # 🌟 专属热度 UI 组件展示
+                    heat_badge = f'<span style="color: #ef4444; font-weight: 700; margin-right: 12px;">🔥 热度 {article.get("heat_score", 85)}</span>' if 'heat_score' in article else ''
+                    
                     card_html = f"""
                     <div class="news-card">
                         <a href="{link}" target="_blank" class="card-thumbnail">
@@ -263,7 +282,10 @@ elif st.session_state.page == 'results':
                             <a href="{link}" target="_blank" class="card-title" title="{title}">{title}</a>
                             <div class="card-meta">
                                 <span class="source-badge">{source}</span>
-                                <span>⏱️ {time_str}</span>
+                                <div>
+                                    {heat_badge}
+                                    <span>⏱️ {time_str}</span>
+                                </div>
                             </div>
                             <div class="card-snippet">
                                 <strong>核心摘要：</strong> {snippet}
