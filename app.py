@@ -13,7 +13,7 @@ st.set_page_config(page_title="AI 聚合资讯台", page_icon="🐋", layout="wi
 # 🧠 Session State 状态管理 (页面路由)
 # ==========================================
 if 'page' not in st.session_state:
-    st.session_state.page = 'home'  # 默认首页
+    st.session_state.page = 'home'
 if 'search_results' not in st.session_state:
     st.session_state.search_results = []
 if 'query_display' not in st.session_state:
@@ -44,8 +44,37 @@ WEBSITE_PLACEHOLDERS = {
 st.markdown("""
 <style>
     #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
-    div[data-testid="stTextInput"] input { border-radius: 30px !important; padding: 20px 24px !important; font-size: 1.25rem !important; border: 1px solid #e0e0e0 !important; box-shadow: 0 8px 24px rgba(0,0,0,0.06) !important; transition: all 0.3s ease; background-color: #ffffff; }
-    div[data-testid="stTextInput"] input:focus { border-color: #3b82f6 !important; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2) !important; }
+    
+    /* 🌟 表单透明化，去除 Streamlit 默认的框 */
+    div[data-testid="stForm"] { border: none !important; padding: 0 !important; background-color: transparent !important; }
+    
+    /* 🌟 大号搜索框优化 */
+    div[data-testid="stTextInput"] input { 
+        border-radius: 20px !important; 
+        padding: 22px 24px !important; 
+        font-size: 1.25rem !important; 
+        border: 1px solid #e0e0e0 !important; 
+        box-shadow: 0 6px 16px rgba(0,0,0,0.04) !important; 
+        background-color: #ffffff; 
+    }
+    div[data-testid="stTextInput"] input:focus { border-color: #3b82f6 !important; box-shadow: 0 6px 16px rgba(59, 130, 246, 0.15) !important; }
+    
+    /* 🌟 纸飞机按钮专属样式 */
+    div[data-testid="stFormSubmitButton"] button {
+        height: 70px !important; /* 对齐左侧输入框高度 */
+        border-radius: 20px !important;
+        font-size: 1.8rem !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e0e0e0 !important;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.04) !important;
+        transition: all 0.2s ease;
+    }
+    div[data-testid="stFormSubmitButton"] button:hover {
+        border-color: #3b82f6 !important;
+        background-color: #f0fdf4 !important; /* 悬浮时变成轻微的反馈色 */
+    }
+
+    /* 卡片瀑布流样式 */
     .news-card { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s ease; margin-bottom: 24px; overflow: hidden; border: 1px solid #f0f0f0; display: flex; flex-direction: column; height: 100%; }
     .news-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
     .card-thumbnail { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-color: #f8f9fa; position: relative; }
@@ -60,7 +89,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 🚀 侧边栏 
+# 🚀 侧边栏
 # ==========================================
 st.sidebar.title("🚀 控制台与工具")
 st.sidebar.markdown("### ⚡ 实时抓取")
@@ -113,19 +142,34 @@ def execute_search(search_type="custom", keyword=""):
         st.session_state.page = "results"
         
     elif search_type == "custom" and keyword.strip():
-        with st.spinner(f"正在全网深潜检索：{keyword} ..."):
-            formatted_query = f"{keyword} AI 人工智能 最新"
+        with st.spinner(f"正在专属信息源中定向检索：{keyword} ..."):
+            DOMAIN_TO_NAME = {
+                "arxiv.org": "arXiv", "jiqizhixin.com": "机器之心", "qbitai.com": "量子位",
+                "36kr.com": "36Kr", "pubscholar.cn": "科讯头条", "cctv.com": "央视网·数智",
+                "ccidgroup.com": "赛迪研究院", "caixin.com": "财新网", "tmtpost.com": "钛媒体",
+                "technologyreview.com": "MIT Tech Review", "venturebeat.com": "VentureBeat"
+            }
+            sites_query = " OR ".join([f"site:{domain}" for domain in DOMAIN_TO_NAME.keys()])
+            formatted_query = f"{keyword} ({sites_query})"
+            
             try:
-                raw_results = DDGS().text(keywords=formatted_query, timelimit='d', max_results=9)
+                raw_results = DDGS().text(keywords=formatted_query, max_results=9)
                 adapted_results = []
                 if raw_results:
                     for item in raw_results:
+                        href = item.get('href', '')
+                        source_name = "权威源检索"
+                        for domain, name in DOMAIN_TO_NAME.items():
+                            if domain in href:
+                                source_name = name
+                                break
+                                
                         adapted_results.append({
-                            'source': '实时检索', 'title': item.get('title', '无标题'), 'url': item.get('href', '#'),
-                            'snippet': item.get('body', '暂无内容'), 'publish_time': '过去 24 小时内', 'cover_image_url': None
+                            'source': source_name, 'title': item.get('title', '无标题'), 'url': href,
+                            'snippet': item.get('body', '暂无内容'), 'publish_time': '全网搜索归档', 'cover_image_url': None
                         })
                 st.session_state.search_results = adapted_results
-                st.session_state.query_display = f"🔍 深度检索结果：{keyword}"
+                st.session_state.query_display = f"🔍 专属源检索结果：{keyword}"
                 st.session_state.page = "results"
             except Exception as e:
                 st.error(f"网络检索接口受限，请稍后再试。报错详情: {e}")
@@ -141,21 +185,32 @@ if st.session_state.page == 'home':
     st.markdown("<h1 style='text-align: center; font-size: 3rem; color: #1f2937; margin-bottom: 20px;'>🐋 今天有什么关于 AI 的问题可以帮到你？</h1>", unsafe_allow_html=True)
     
     col_left, col_main, col_right = st.columns([1, 2, 1])
+    
     with col_main:
-        user_input = st.text_input("搜索", placeholder="搜索全网最新 AI 资讯...", label_visibility="collapsed", key="search_input")
-        
-        btn_col1, btn_col2, btn_col3, btn_col4 = st.columns([1, 1.5, 1.5, 1])
-        with btn_col2:
-            if st.button("🚀 深度检索", use_container_width=True):
+        # 🌟 核心排版：利用 st.form 实现回车绑定，并用列来左右排布
+        with st.form(key='search_form'):
+            # 85% 给输入框，15% 给按钮
+            input_col, btn_col = st.columns([85, 15])
+            with input_col:
+                user_input = st.text_input("搜索", placeholder="搜索全网最新 AI 资讯...", label_visibility="collapsed")
+            with btn_col:
+                # 这个按钮会在视觉上紧贴输入框右侧
+                submit_search = st.form_submit_button("✈️", use_container_width=True)
+            
+            if submit_search:
                 if user_input:
                     execute_search("custom", user_input)
-                    st.rerun() # 🌟 关键修复：强制刷新，瞬间切换页面！
+                    st.rerun()
                 else:
                     st.warning("请先输入你想检索的关键词哦！")
-        with btn_col3:
+        
+        # 🌟 核心排版：利用空列居中“最新动态”按钮
+        st.markdown("<br>", unsafe_allow_html=True)
+        _, center_btn_col, _ = st.columns([1, 1, 1])
+        with center_btn_col:
             if st.button("📰 看看最新动态", use_container_width=True):
                 execute_search("latest")
-                st.rerun() # 🌟 关键修复：强制刷新，瞬间切换页面！
+                st.rerun()
                 
     st.markdown("<br><br><br><br><p style='text-align:center; color:#9ca3af; font-size:0.9rem;'>Powered by DuckDuckGo & DeepSeek · 数据抓取自 11 个全球顶尖源流</p>", unsafe_allow_html=True)
 
