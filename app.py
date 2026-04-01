@@ -23,6 +23,8 @@ if 'query_display' not in st.session_state:
     st.session_state.query_display = ""
 if 'show_update_toast' not in st.session_state:
     st.session_state.show_update_toast = False
+if 'is_latest_view' not in st.session_state:
+    st.session_state.is_latest_view = False # 用于标记是否处于“最新动态”模式
 
 # ==========================================
 # 🖼️ 网站专属兜底封面图
@@ -39,92 +41,33 @@ WEBSITE_PLACEHOLDERS = {
     "财新网": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?q=80&w=800&auto=format&fit=crop",
     "钛媒体": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop",
     "MIT Tech Review": "https://images.unsplash.com/photo-1507146153580-69a1fe6d8aa1?q=80&w=800&auto=format&fit=crop",
-    "VentureBeat": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop"
+    "VentureBeat": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop",
+    "全网检索": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop"
 }
 
 # ==========================================
-# 💅 深度定制的 CSS 样式 (终极 Flexbox 修复版)
+# 💅 深度定制的 CSS 样式
 # ==========================================
 st.markdown("""
 <style>
     #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
     
     /* === 🌟 终极搜索框魔法：Flexbox 容器伪装术 === */
-    /* 1. 消除 Form 外围默认样式 */
-    div[data-testid="stForm"] { 
-        border: none !important; 
-        background: transparent !important; 
-        padding: 0 !important; 
-    }
+    div[data-testid="stForm"] { border: none !important; background: transparent !important; padding: 0 !important; }
+    div[data-testid="stForm"] > div:first-child { display: flex !important; flex-direction: row !important; align-items: center !important; background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 40px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; padding: 4px 12px 4px 24px !important; gap: 8px !important; }
+    div[data-testid="stForm"] > div:first-child:focus-within { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important; }
+    div[data-testid="stForm"] div[data-testid="stTextInput"] { flex-grow: 1 !important; margin: 0 !important; }
+    div[data-testid="stForm"] div[data-testid="stTextInput"] input { border: none !important; box-shadow: none !important; background: transparent !important; font-size: 1.15rem !important; padding: 0 !important; height: 50px !important; color: #1e293b !important; }
+    div[data-testid="stForm"] div[data-testid="stTextInput"] input:focus { box-shadow: none !important; border: none !important; }
     
-    /* 2. 【核心重构】将 Form 的内部容器变成一个【水平排布】的大药丸（模拟输入框） */
-    div[data-testid="stForm"] > div:first-child {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        background-color: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 40px !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-        padding: 4px 12px 4px 24px !important;
-        gap: 8px !important;
-    }
-    /* 输入框获得焦点时，整个大药丸亮起蓝边 */
-    div[data-testid="stForm"] > div:first-child:focus-within {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
-    }
-    
-    /* 3. 剥夺原生输入框的所有边框和背景，让它溶入大药丸 */
-    div[data-testid="stForm"] div[data-testid="stTextInput"] { 
-        flex-grow: 1 !important; 
-        margin: 0 !important; 
-    }
-    div[data-testid="stForm"] div[data-testid="stTextInput"] input { 
-        border: none !important; 
-        box-shadow: none !important; 
-        background: transparent !important; 
-        font-size: 1.15rem !important; 
-        padding: 0 !important; 
-        height: 50px !important; 
-        color: #1e293b !important;
-    }
-    div[data-testid="stForm"] div[data-testid="stTextInput"] input:focus { 
-        box-shadow: none !important; 
-        border: none !important;
-    }
-    
-    /* 4. 星星按钮：取消背景和边框，作为同行元素紧贴右侧 */
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] { 
-        margin: 0 !important; 
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button { 
-        border: none !important; 
-        background: transparent !important; 
-        box-shadow: none !important; 
-        font-size: 1.6rem !important; 
-        color: #f59e0b !important; 
-        width: 48px !important;
-        height: 48px !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        transition: transform 0.2s ease, background-color 0.2s ease !important; 
-        padding: 0 !important;
-        line-height: 1 !important;
-    }
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover { 
-        transform: scale(1.15) !important; 
-        color: #d97706 !important; 
-        background-color: #fffbeb !important; 
-    }
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] { margin: 0 !important; padding: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button { border: none !important; background: transparent !important; box-shadow: none !important; font-size: 1.6rem !important; color: #f59e0b !important; width: 48px !important; height: 48px !important; border-radius: 50% !important; display: flex !important; justify-content: center !important; align-items: center !important; transition: transform 0.2s ease, background-color 0.2s ease !important; padding: 0 !important; line-height: 1 !important; }
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover { transform: scale(1.15) !important; color: #d97706 !important; background-color: #fffbeb !important; }
 
-    /* === 卡片瀑布流基础样式 === */
+    /* 动态筛选 Radio 样式美化 */
+    div[data-testid="stRadio"] > div { display: flex; gap: 20px; background-color: #f8fafc; padding: 10px 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+
+    /* 卡片瀑布流样式 */
     .news-card { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s ease; margin-bottom: 24px; overflow: hidden; border: 1px solid #f0f0f0; display: flex; flex-direction: column; height: 100%; }
     .news-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
     .card-thumbnail { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-color: #f8f9fa; position: relative; }
@@ -139,7 +82,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 🚀 全局侧边栏 (坚定守护你的 AI 词典)
+# 🚀 全局侧边栏
 # ==========================================
 st.sidebar.title("🚀 工具箱")
 st.sidebar.markdown("### 📖 随身 AI 词典")
@@ -180,8 +123,9 @@ def trigger_github_update():
 # ==========================================
 def execute_search(search_type="custom", keyword=""):
     if search_type == "latest":
+        st.session_state.is_latest_view = True 
         DATA_FILE = "daily_news.json"
-        filtered_results = []
+        all_results = []
         if os.path.exists(DATA_FILE):
             try:
                 with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -196,7 +140,9 @@ def execute_search(search_type="custom", keyword=""):
                     except:
                         days_old = 3
                     
-                    if days_old <= 14:
+                    item['days_old'] = days_old  # 🌟 将时间跨度存入字典，让前端自由筛选
+                    
+                    if days_old <= 14: # 只处理两周内的数据，太老的直接丢弃
                         heat = 60 + max(0, (14 - days_old) * 2) 
                         title_upper = item.get('title', '').upper()
                         hot_words = ['SORA', 'GPT', '大模型', 'OPENAI', '芯片', 'NVIDIA', '英伟达', 'AGI']
@@ -206,19 +152,21 @@ def execute_search(search_type="custom", keyword=""):
                         url_hash = int(hashlib.md5(item.get('url', '').encode()).hexdigest()[:4], 16)
                         heat += (url_hash % 16)
                         item['heat_score'] = min(99, heat)
-                        filtered_results.append(item)
+                        all_results.append(item)
                         
-                filtered_results.sort(key=lambda x: x.get('heat_score', 0), reverse=True)
-                st.session_state.search_results = filtered_results
+                # 默认先按整体热度排行
+                all_results.sort(key=lambda x: x.get('heat_score', 0), reverse=True)
+                st.session_state.search_results = all_results
             except Exception as e:
                 st.error(f"读取数据失败: {e}")
         else:
             st.session_state.search_results = []
             
-        st.session_state.query_display = "🔥 近两周 AI 热门风向标"
+        st.session_state.query_display = "📰 权威源 AI 最新聚合"
         st.session_state.page = "results"
         
     elif search_type == "custom" and keyword.strip():
+        st.session_state.is_latest_view = False 
         with st.spinner(f"正在全网深潜检索：{keyword} ..."):
             DOMAIN_TO_NAME = {
                 "arxiv.org": "arXiv", "jiqizhixin.com": "机器之心", "qbitai.com": "量子位",
@@ -313,11 +261,31 @@ elif st.session_state.page == 'results':
     with nav_col2:
         st.markdown(f"<h3 style='margin-top:0;'>{st.session_state.query_display}</h3>", unsafe_allow_html=True)
         
+        # 🌟 核心新功能：极其精准的“新老数据池”重构过滤逻辑
+        if st.session_state.is_latest_view:
+            filter_mode = st.radio(
+                "请选择展示频道：",
+                ["🔥 热门榜单 (近两周最高热度)", "⚡ 最新前沿 (近三天高热资讯)"],
+                horizontal=True,
+                label_visibility="collapsed"
+            )
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # 【既新又热】核心代码：从全量缓存数据中专门找出<=3天的数据，再给这批新数据单独排个热度榜！
+            if "近三天" in filter_mode:
+                recent_pool = [item for item in st.session_state.search_results if item.get('days_old', 3) <= 3]
+                news_data = sorted(recent_pool, key=lambda x: x.get('heat_score', 0), reverse=True)
+            else:
+                # 默认状态：近14天的全量热度榜
+                news_data = sorted(st.session_state.search_results, key=lambda x: x.get('heat_score', 0), reverse=True)
+        else:
+            news_data = st.session_state.search_results
+            st.markdown("<br>", unsafe_allow_html=True)
+            
     st.markdown("---")
-    news_data = st.session_state.search_results
     
     if not news_data:
-        st.info("📭 抱歉，没有找到匹配的近期数据。换个词试试？")
+        st.info("📭 抱歉，该时间段内没有找到足够的数据。")
     else:
         cols_per_row = 3
         for i in range(0, len(news_data), cols_per_row):
@@ -326,14 +294,12 @@ elif st.session_state.page == 'results':
                 if i + j < len(news_data):
                     article = news_data[i + j]
                     
-                    # 🌟 关键防御：使用 html.escape() 防止 DuckDuckGo 携带的杂乱标签破坏结构！
                     title_safe = html.escape(article.get('title', '无标题'))
                     link_safe = html.escape(article.get('url', '#'))
                     source_safe = html.escape(article.get('source', '未知'))
                     time_str_safe = html.escape(article.get('publish_time', '最近'))
                     snippet_safe = html.escape(article.get('ai_summary') or article.get('snippet', '无摘要内容'))
                     
-                    # 🌟 核心定制：当数据来源是"全网检索"时，采用专用的【极简左右排版】
                     if source_safe == "全网检索":
                         card_html = f"""
                         <div class="news-card" style="padding: 20px; flex-direction: row; align-items: flex-start; gap: 16px;">
@@ -349,7 +315,6 @@ elif st.session_state.page == 'results':
                         </div>
                         """
                     else:
-                        # 普通站点的标准 YouTube 卡片样式
                         final_cover_url = article.get('cover_image_url')
                         if not final_cover_url:
                             final_cover_url = WEBSITE_PLACEHOLDERS.get(source_safe, DEFAULT_COVER)
@@ -378,3 +343,4 @@ elif st.session_state.page == 'results':
                         """
                     
                     cols[j].markdown(card_html, unsafe_allow_html=True)
+                        
