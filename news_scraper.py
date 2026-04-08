@@ -1,274 +1,156 @@
-import os
 import requests
 from bs4 import BeautifulSoup
-import feedparser
-import logging
+import json
+import os
 import time
-import random
-import re
-from datetime import datetime, timedelta
-from urllib.parse import urljoin
-# 确保导入你的 AI 总结模块
-from ai_summarizer import process_and_save_news  
+from datetime import datetime
 
 # ==========================================
-# ⚙️ 基础配置与日志
+# 🛠️ 配置与环境变量
 # ==========================================
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
-]
-
-def get_random_headers():
-    return {
-        'User-Agent': random.choice(USER_AGENTS),
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-    }
+DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+API_URL = "https://api.deepseek.com/chat/completions"
 
 # ==========================================
-# 🕒 时间解析引擎 (Time Parser)
+# 📰 核心：深度正文抓取函数
 # ==========================================
-def parse_publish_time(time_str):
-    """健壮的时间解析，支持相对时间和绝对时间"""
-    now = datetime.now()
-    if not time_str: return now
-    time_str = str(time_str).strip()
-    
+def get_article_content(url):
+    """进入详情页，抓取核心正文（避开导航和广告）"""
     try:
-        if "刚刚" in time_str: return now
-        
-        match_min = re.search(r'(\d+)\s*分钟前', time_str)
-        if match_min: return now - timedelta(minutes=int(match_min.group(1)))
-            
-        match_hour = re.search(r'(\d+)\s*小时前', time_str)
-        if match_hour: return now - timedelta(hours=int(match_hour.group(1)))
-            
-        if "昨天" in time_str:
-            match_time = re.search(r'(\d{1,2}):(\d{2})', time_str)
-            if match_time:
-                hour, minute = int(match_time.group(1)), int(match_time.group(2))
-                return now.replace(hour=hour, minute=minute, second=0) - timedelta(days=1)
-            return now - timedelta(days=1)
-            
-        # 匹配 YYYY-MM-DD HH:MM
-        match_date = re.search(r'(\d{4})[-\./年](\d{1,2})[-\./月](\d{1,2})日?(?:\s+(\d{1,2}):(\d{2}))?', time_str)
-        if match_date:
-            year, month, day = map(int, match_date.groups()[:3])
-            hour = int(match_date.group(4)) if match_date.group(4) else 0
-            minute = int(match_date.group(5)) if match_date.group(5) else 0
-            return datetime(year, month, day, hour, minute)
-            
-    except Exception as e:
-        logging.warning(f"时间解析失败 '{time_str}', 错误: {e}")
-        
-    return now
-
-def get_article_detail(url, timeout=10):
-    """访问文章详情页，智能提取正文摘要和发布时间"""
-    snippet, pub_time_str = "未能提取到有效正文", ""
-    try:
-        response = requests.get(url, headers=get_random_headers(), timeout=timeout)
-        
-        response.raise_for_status()
-        response.encoding = response.apparent_encoding 
-        soup = BeautifulSoup(response.text, 'html.parser')
-
-        #优先寻找 Open Graph 协议的封面图
-        og_image = soup.find('meta', property='og:image')
-        if og_image and og_image.get('content'):
-            cover_image_url = og_image['content']
-        
-        # 1. 提取正文片段
-        paragraphs = soup.find_all('p')
-        text_content = ""
-        for p in paragraphs:
-            text = p.get_text(strip=True)
-            if len(text) > 20: text_content += text + " "
-            if len(text_content) > 150: break
-        if text_content: snippet = text_content
-            
-        # 2. 尝试从网页文本中用正则抓取日期格式
-        html_text = soup.get_text()
-        time_match = re.search(r'(202\d[-\./年]\d{1,2}[-\./月]\d{1,2}日?(?:\s+\d{1,2}:\d{2})?)', html_text)
-        if time_match: pub_time_str = time_match.group(1)
-        
-    except Exception as e:
-        pass
-    return snippet, parse_publish_time(pub_time_str), cover_image_url
-
-# ==========================================
-# 🤖 通用网站抓取器 (自动寻路逻辑)
-# ==========================================
-def generic_news_fetcher(source_name, target_url, limit=3, timeout=10, must_contain_ai=False):
-    """通用的智能抓取函数，适用未知 HTML 结构的站点"""
-    logging.info(f"开始抓取 [{source_name}] ...")
-    news_list = []
-    ai_keywords = ["AI", "大模型", "人工智能", "算法", "GPT", "算力"]
-    
-    try:
-        response = requests.get(target_url, headers=get_random_headers(), timeout=timeout)
-        response.encoding = response.apparent_encoding
-        response.raise_for_status()
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        response = requests.get(url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        seen_urls = set()
-        count = 0
+        # 自动寻找常见的正文容器
+        article_body = ""
+        # 尝试常见的正文标签
+        potential_containers = soup.find_all(['article', 'div', 'main'])
+        for container in potential_containers:
+            # 过滤掉杂质，只找段落比较集中的地方
+            paragraphs = container.find_all('p')
+            if len(paragraphs) > 3:
+                article_body = "\n".join([p.get_text().strip() for p in paragraphs[:8]]) # 取前8段
+                break
         
-        # 寻找所有 a 标签
-        for a_tag in soup.find_all('a'):
-            if count >= limit: break
-            link = a_tag.get('href')
-            title = a_tag.get_text(strip=True)
-            
-            # 基础过滤：标题太短、无链接、或者属于无关的导航链接
-            if not title or len(title) < 8 or not link or 'javascript' in link: continue
-            
-            # 如果要求必须包含 AI 关键词（比如针对财新网首页）
-            if must_contain_ai and not any(kw.lower() in title.lower() for kw in ai_keywords):
-                continue
-                
-            full_link = urljoin(target_url, link)
-            if full_link in seen_urls: continue
-            seen_urls.add(full_link)
-            
-            # 深入详情页抓取摘要和时间
-            snippet, pub_time = get_article_detail(full_link, timeout=timeout)
-            
-            news_list.append({
-                'source': source_name,
-                'title': title,
-                'url': full_link,
-                'snippet': snippet,
-                'publish_time': pub_time,
-                'cover_image_url': cover_img
-            })
-            count += 1
-            time.sleep(random.uniform(1.5, 3)) # 礼貌延时
-            
+        return article_body[:1500] # 最多取1500字，给AI提供充足素材
     except Exception as e:
-        logging.error(f"❌ 抓取 {source_name} 失败: {e}")
+        return ""
+
+# ==========================================
+# 🤖 核心：AI 首席编辑逻辑 (分两步)
+# ==========================================
+
+def ai_editor_selection(news_list):
+    """第一步：从海量标题中筛选出真正有价值的重磅新闻"""
+    if not news_list: return []
+    
+    titles = [f"{i}. {n['title']}" for i, n in enumerate(news_list)]
+    prompt = f"""你是一位全球顶尖的科技编辑。请从以下新闻标题中，挑选出最具有“技术突破性”、“行业震荡性”或“高度讨论价值”的 8-10 条。
+    请只输出选中新闻的索引数字，用逗号隔开，不要任何废话。
+    
+    新闻列表：
+    {chr(10).join(titles)}
+    """
+    
+    try:
+        headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"}
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [{"role": "system", "content": "你是一个严苛的新闻主编。"}, {"role": "user", "content": prompt}]
+        }
+        resp = requests.post(API_URL, headers=headers, json=payload, timeout=30)
+        indices = resp.json()['choices'][0]['message']['content'].strip().split(',')
+        selected_indices = [int(i.strip()) for i in indices if i.strip().isdigit()]
+        return [news_list[i] for i in selected_indices if i < len(news_list)]
+    except:
+        return news_list[:10] # 如果AI筛选失败，退而求其次取前10条
+
+def ai_deep_summary(title, content):
+    """第二步：根据深度正文进行高质量总结"""
+    if not content or len(content) < 50:
+        return "（素材不足，仅根据标题记录）"
         
-    return news_list
-
-# ==========================================
-# 🇨🇳 新增的 5 个国内权威站点
-# ==========================================
-def fetch_pubscholar():
-    return generic_news_fetcher("科讯头条", "https://pubscholar.cn/headlines", limit=2)
-
-def fetch_cctv_ai():
-    return generic_news_fetcher("央视网·数智", "http://5gai.cctv.cn/h5/index.shtml", limit=2)
-
-def fetch_ccid():
-    return generic_news_fetcher("赛迪研究院", "https://www.ccidgroup.com/info/1155/43077.htm", limit=2)
-
-def fetch_caixin():
-    # 财新网内容庞杂，开启 must_contain_ai=True 进行过滤
-    return generic_news_fetcher("财新网", "https://www.caixin.com", limit=2, must_contain_ai=True)
-
-def fetch_tmtpost():
-    return generic_news_fetcher("钛媒体", "https://www.tmtpost.com/tag/topic/299106", limit=2)
-
-# ==========================================
-# 🌍 新增的 2 个海外站点 (严格熔断)
-# ==========================================
-def fetch_mit_tech_review():
-    """海外站：MIT Technology Review (严格超时熔断)"""
+    prompt = f"""请根据以下文章正文，提供一个高质量的深度摘要。
+    要求：
+    1. 包含核心技术点或事件背景。
+    2. 说明该事件对AI行业的具体影响。
+    3. 语言专业、精炼。
+    4. 字数在 150-200 字之间。
+    
+    标题：{title}
+    正文：{content}
+    """
+    
     try:
-        return generic_news_fetcher("MIT Tech Review", "https://www.technologyreview.com/topic/artificial-intelligence/", limit=2, timeout=8)
-    except requests.exceptions.Timeout:
-        logging.error("❌ 触发熔断：[MIT Tech Review] 请求超时 (>8秒)")
-        return []
-    except Exception:
-        return []
+        headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"}
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 500
+        }
+        resp = requests.post(API_URL, headers=headers, json=payload, timeout=30)
+        return resp.json()['choices'][0]['message']['content'].strip()
+    except:
+        return "AI 深度解析失败。"
 
-def fetch_venturebeat():
-    """海外站：VentureBeat (严格超时熔断)"""
+# ==========================================
+# 🕵️ 抓取源：新增 Hacker News
+# ==========================================
+def scrape_hacker_news():
+    news = []
     try:
-        return generic_news_fetcher("VentureBeat", "https://venturebeat.com/category/ai/", limit=2, timeout=8)
-    except requests.exceptions.Timeout:
-        logging.error("❌ 触发熔断：[VentureBeat] 请求超时 (>8秒)")
-        return []
-    except Exception:
-        return []
+        # 获取 TopStories ID
+        top_ids = requests.get("https://hacker-news.firebaseio.com/v0/topstories.json").json()[:15]
+        for item_id in top_ids:
+            detail = requests.get(f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json").json()
+            if 'title' in detail and 'url' in detail:
+                news.append({
+                    'source': 'Hacker News',
+                    'title': f"[极客热议] {detail['title']}",
+                    'url': detail['url'],
+                    'snippet': '点击查看详情'
+                })
+    except: pass
+    return news
 
 # ==========================================
-# 🏛️ 原有的 4 个经典站点 (简写调用)
+# 🚀 主运行函数
 # ==========================================
-def fetch_arxiv_news(limit=2):
-    logging.info("开始抓取 [arXiv] ...")
-    news_list = []
-    try:
-        feed = feedparser.parse("http://export.arxiv.org/rss/cs.AI")
-        for entry in feed.entries[:limit]: 
-            pub_time = parse_publish_time(entry.get('published', ''))
-            news_list.append({
-                'source': 'arXiv', 'title': entry.get('title', ''), 'url': entry.get('link', ''),
-                'snippet': BeautifulSoup(entry.get('summary', ''), "html.parser").get_text(strip=True),
-                'publish_time': pub_time
-            })
-    except Exception as e: pass
-    return news_list
-
-def fetch_jiqizhixin(): return generic_news_fetcher("机器之心", "https://www.jiqizhixin.com", limit=2)
-def fetch_qbitai(): return generic_news_fetcher("量子位", "https://www.qbitai.com/", limit=2)
-def fetch_36kr(): return generic_news_fetcher("36Kr", "https://36kr.com/information/ai/", limit=2)
-
-# ==========================================
-# 🌟 全局汇总与时间排序核心
-# ==========================================
-def aggregate_news():
-    logging.info("================ 开始执行 11 站全量聚合 ==================")
-    all_news = []
+def main():
+    print(f"[{datetime.now()}] 启动深度抓取任务...")
     
-    # 1. 执行原有的 4 个站点
-    all_news.extend(fetch_arxiv_news())
-    all_news.extend(fetch_jiqizhixin())
-    all_news.extend(fetch_qbitai())
-    all_news.extend(fetch_36kr())
+    # 1. 采集全网原始资讯 (这里仅展示核心逻辑，你可以把之前的11个源都放进来)
+    raw_news = []
+    raw_news.extend(scrape_hacker_news())
+    # ... 此处省略你之前的 36Kr, 机器之心等抓取函数 ...
     
-    # 2. 执行新增的国内 5 个权威站点
-    all_news.extend(fetch_pubscholar())
-    all_news.extend(fetch_cctv_ai())
-    all_news.extend(fetch_ccid())
-    all_news.extend(fetch_caixin())
-    all_news.extend(fetch_tmtpost())
+    # 2. AI 首席编辑筛选（海选 -> 精选）
+    print(f"海选抓取到 {len(raw_news)} 条，正在进行 AI 精选...")
+    top_news = ai_editor_selection(raw_news)
     
-    # 3. 执行海外站点 (带有熔断机制，若超时会静默失败不影响大局)
-    all_news.extend(fetch_mit_tech_review())
-    all_news.extend(fetch_venturebeat())
-    
-    if not all_news:
-        logging.warning("本次运行未能抓取到任何新闻！")
-        return []
+    # 3. 深度内容提取与总结
+    final_data = []
+    for item in top_news:
+        print(f"正在深入解析: {item['title']}")
+        # 重点：不再使用列表页的 snippet，而是去抓正文！
+        full_content = get_article_content(item['url'])
         
-    logging.info(f"全站聚合完毕，初步获取 {len(all_news)} 条资讯，准备进行时间排序...")
-
-    # 核心：根据 datetime 对象倒序排列 (最新 -> 最旧)
-    all_news.sort(key=lambda x: x['publish_time'], reverse=True)
+        # 喂给 AI 进行深度总结
+        summary = ai_deep_summary(item['title'], full_content)
+        
+        item['ai_summary'] = summary
+        item['publish_time'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+        # 给深度解析的文章手动赋予极高初始热度
+        item['heat_score'] = 95 
+        final_data.append(item)
+        
+        time.sleep(1) # 礼貌抓取
     
-    # 将 datetime 对象格式化为字符串，方便保存 JSON
-    for news in all_news:
-        if isinstance(news['publish_time'], datetime):
-            news['publish_time'] = news['publish_time'].strftime('%Y-%m-%d %H:%M')
+    # 4. 保存结果
+    with open("daily_news.json", "w", encoding="utf-8") as f:
+        json.dump(final_data, f, ensure_ascii=False, indent=4)
+    print("任务完成！")
 
-    logging.info(f"排序完成！最新新闻时间为: {all_news[0]['publish_time']}")
-    return all_news
-
-# ==========================================
-# 🚀 真实的生产启动入口
-# ==========================================
 if __name__ == "__main__":
-    aggregated_results = aggregate_news()
-    
-    if aggregated_results:
-        logging.info(f"准备将 {len(aggregated_results)} 条已排序资讯交由 AI 总结...")
-        # 调用大模型总结并保存
-        process_and_save_news(aggregated_results, "daily_news.json")
-    else:
-        logging.warning("今天没有抓取到任何新闻，跳过 AI 总结步骤。")
+    main()
