@@ -12,7 +12,7 @@ from duckduckgo_search import DDGS
 # ==========================================
 st.set_page_config(page_title="AI 聚合资讯台", page_icon="🐋", layout="wide")
 
-# 核心状态管理：检查 URL 参数，确保刷新时不回首页
+# 🌟 核心：状态持久化逻辑 🌟
 params = st.query_params
 if 'page' not in st.session_state:
     st.session_state.page = params.get("p", "home")
@@ -120,6 +120,7 @@ with st.sidebar:
     if st.button("🏠 返回首页", use_container_width=True):
         st.session_state.page = "home"
         st.session_state.keyword_explanation = None
+        st.session_state.search_results = []
         st.query_params.clear()
         st.rerun()
 
@@ -127,25 +128,28 @@ with st.sidebar:
 # ⚙️ 核心逻辑：执行检索并同步 URL 状态 (集成 AI 释义)
 # ==========================================
 def run_search(search_type="custom", keyword=""):
-    st.session_state.keyword_explanation = None # 重置
+    st.session_state.keyword_explanation = None 
     
     if search_type == "latest":
         st.session_state.is_latest_view = True
+        st.query_params["p"] = "results"
+        st.query_params["m"] = "latest"
         if os.path.exists("daily_news.json"):
             with open("daily_news.json", "r", encoding="utf-8") as f:
                 st.session_state.search_results = json.load(f)
     elif search_type == "custom" and keyword:
         st.session_state.is_latest_view = False
+        st.query_params["p"] = "results"
+        st.query_params["q"] = keyword
         
-        # 🌟 合并逻辑：先获取 AI 对词汇的解释
+        # 🌟 合并逻辑：获取 AI 对词汇的解释
         api_key = os.environ.get("DEEPSEEK_API_KEY", "")
         if api_key:
             try:
-                # 即使搜索报错也不影响后续资讯展示，所以包在 try 里
                 resp = requests.post("https://api.deepseek.com/chat/completions", headers={"Authorization": f"Bearer {api_key}"}, json={
                     "model": "deepseek-chat", 
                     "messages": [
-                        {"role": "system", "content": "你是一个资深的 AI 领域科普专家。请在100字内通俗解释用户提供的 AI 术语。如果该词与 AI 无关，请简要说明其通用定义。"}, 
+                        {"role": "system", "content": "你是一个资深的 AI 领域科普专家。请在100字内通俗解释用户提供的 AI 术语。"}, 
                         {"role": "user", "content": keyword}
                     ]
                 }, timeout=10)
@@ -161,15 +165,28 @@ def run_search(search_type="custom", keyword=""):
             try:
                 raw = DDGS().text(keywords=f"{keyword} AI 最新资讯", max_results=9)
                 st.session_state.search_results = [{'source': '全网检索', 'title': r['title'], 'url': r['href'], 'ai_summary': r['body'], 'publish_time': '实时', 'cover_image_url': None} for r in raw]
-            except: st.error("检索请求暂时限流。")
+            except: 
+                st.session_state.search_results = []
+                st.error("检索请求暂时限流。")
     
     st.session_state.page = "results"
-    st.query_params["p"] = "results" 
 
 def go_home():
     st.session_state.page = "home"
     st.session_state.keyword_explanation = None
+    st.session_state.search_results = []
     st.query_params.clear()
+
+# ==========================================
+# 🔄 刷新恢复逻辑：如果内存为空但 URL 有参数，重新触发搜索
+# ==========================================
+if st.session_state.page == "results" and not st.session_state.search_results:
+    mode = params.get("m")
+    query = params.get("q")
+    if mode == "latest":
+        run_search("latest")
+    elif query:
+        run_search("custom", query)
 
 # ==========================================
 # 🖥️ 页面模式逻辑
@@ -200,7 +217,7 @@ elif st.session_state.page == 'results':
     with title_c: 
         st.title("🔍 资讯情报站")
         if st.session_state.is_latest_view:
-            mode = st.radio("频道：", ["🔥 热门榜单 (Top 14D)", "⚡ 最新前沿 (Top 3D)"], horizontal=True, label_visibility="collapsed")
+            mode_choice = st.radio("频道：", ["🔥 热门榜单 (Top 14D)", "⚡ 最新前沿 (Top 3D)"], horizontal=True, label_visibility="collapsed")
             raw_data = st.session_state.search_results
             now = datetime.now()
             
@@ -208,7 +225,7 @@ elif st.session_state.page == 'results':
                 try: return (now - datetime.strptime(t_str, '%Y-%m-%d %H:%M')).days
                 except: return 1
             
-            if "最新" in mode:
+            if "最新" in mode_choice:
                 display_data = sorted([item for item in raw_data if get_days(item.get('publish_time','')) <= 3], key=lambda x: x.get('heat_score',0), reverse=True)
             else:
                 display_data = sorted(raw_data, key=lambda x: x.get('heat_score',0), reverse=True)
@@ -217,7 +234,7 @@ elif st.session_state.page == 'results':
 
     st.markdown("---")
 
-    # 🌟 核心新功能：展示 AI 词典释义 (合并版)
+    # 🌟 AI 词典释义
     if st.session_state.keyword_explanation:
         dict_data = st.session_state.keyword_explanation
         st.markdown(f"""
