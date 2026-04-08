@@ -1,274 +1,47 @@
 [
     {
-        "source": "arXiv",
-        "title": "Operational Noncommutativity in Sequential Metacognitive Judgments",
-        "url": "https://arxiv.org/abs/2604.04938",
-        "snippet": "arXiv:2604.04938v1 Announce Type: new \nAbstract: Metacognition, understood as the monitoring and regulation of one's own cognitive processes, is inherently sequential: an agent evaluates an internal state, updates it, and may then re-evaluate under modified criteria. Order effects in cognition are well documented, yet it remains unclear whether such effects reflect classical state changes or reveal a deeper structural non-commutativity. We develop an operational framework that makes this distinction explicit. In our formulation, metacognitive evaluations are modeled as state-transforming operations acting on an internal state space with probabilistic readouts, thereby separating evaluation back-action from observable output.\n  We show that order dependence prevents any faithful Boolean-commutative representation. We then address a stronger question: can observed order effects always be explained by enlarging the state space with classical latent variables? To formalize this issue, we introduce two assumptions, counterfactual definiteness and evaluation non-invasiveness, under which the existence of a joint distribution over all sequential readouts implies a family of testable constraints on pairwise sequential correlations. Violation of these constraints rules out any classical non-invasive account and certifies what we call genuine non-commutativity.\n  We provide an explicit three-dimensional rotation model with fully worked numerical examples that exhibits such violations. We also outline a behavioral paradigm involving sequential confidence, error-likelihood, and feeling-of-knowing judgments following a perceptual decision, together with the corresponding empirical test. No claim is made regarding quantum physical substrates; the framework is purely operational and algebraic.",
-        "publish_time": "2026-04-08 06:06",
-        "ai_summary": "一项新研究提出操作框架，探讨元认知过程中的顺序效应。研究发现，顺序依赖无法用布尔交换性表示，且在某些条件下，顺序相关性若违反特定约束，则表明存在“真正的非交换性”，无法用经典隐变量解释。研究通过三维旋转模型和可实证的行为范式进行了说明。"
+        "source": "Hacker News",
+        "title": "[极客热议] Project Glasswing: Securing critical software for the AI era",
+        "url": "https://www.anthropic.com/glasswing",
+        "snippet": "点击查看详情",
+        "ai_summary": "**深度摘要：**\n\nAnthropic未发布的前沿模型Claude Mythos2 Preview展现出超越顶尖人类专家的代码漏洞挖掘与利用能力，已发现包括主流操作系统和浏览器在内的数千个高危漏洞。这标志着AI在网络安全领域的能力已抵达临界点，其快速演进可能使攻击能力扩散至非安全行为体，对经济、公共安全及国家安全构成严峻威胁。\n\n为此，Anthropic牵头启动“Project Glasswing”，旨在将此类能力转向防御性应用。项目核心举措包括：联合合作伙伴将Mythos Preview用于主动防御；向40余家关键软件基础设施组织提供模型访问权限，以扫描并加固其自有及开源系统；并承诺投入1亿美元使用额度及400万美元直接捐赠，以提升全行业开源软件安全基线。此举旨在抢在恶意应用普及前，构建以AI赋能的大规模主动防御体系，重塑AI时代的网络安全范式。",
+        "publish_time": "2026-04-08 12:53",
+        "heat_score": 95
     },
     {
-        "source": "arXiv",
-        "title": "Pramana: Fine-Tuning Large Language Models for Epistemic Reasoning through Navya-Nyaya",
-        "url": "https://arxiv.org/abs/2604.04937",
-        "snippet": "arXiv:2604.04937v1 Announce Type: new \nAbstract: Large language models produce fluent text but struggle with systematic reasoning, often hallucinating confident but unfounded claims. When Apple researchers added irrelevant context to mathematical problems, LLM performance degraded by 65% Apple Machine Learning Research, exposing brittle pattern-matching beneath apparent reasoning. This epistemic gap, the inability to ground claims in traceable evidence, limits AI reliability in domains requiring justification. We introduce Pramana, a novel approach that teaches LLMs explicit epistemological methodology by fine-tuning on Navya-Nyaya logic, a 2,500-year-old Indian reasoning framework. Unlike generic chain-of-thought prompting, Navya-Nyaya enforces structured 6-phase reasoning: SAMSHAYA (doubt analysis), PRAMANA (evidence source identification), PANCHA AVAYAVA (5-member syllogism with universal rules), TARKA (counterfactual verification), HETVABHASA (fallacy detection), and NIRNAYA (ascertainment distinguishing knowledge from hypothesis). This integration of logic and epistemology provides cognitive scaffolding absent from standard reasoning approaches. We fine-tune Llama 3.2-3B and DeepSeek-R1-Distill-Llama-8B on 55 Nyaya-structured logical problems (constraint satisfaction, Boolean SAT, multi-step deduction). Stage 1 achieves 100% semantic correctness on held-out evaluation despite only 40% strict format adherence revealing that models internalize reasoning content even when structural enforcement is imperfect. Ablation studies show format prompting and temperature critically affect performance, with optimal configurations differing by stage. We release all models, datasets, and training infrastructure on Hugging Face to enable further research on epistemic frameworks for AI reasoning.",
-        "publish_time": "2026-04-08 06:06",
-        "ai_summary": "苹果研究人员发现，大语言模型在推理中存在缺陷，易受无关信息干扰。为此，研究团队引入基于印度古典逻辑体系“正理”的Pramana方法，通过六阶段结构化推理训练模型。实验表明，该方法能有效提升模型在逻辑问题上的语义准确性，相关资源已开源。"
+        "source": "Hacker News",
+        "title": "[极客热议] MegaTrain: Full Precision Training of 100B+ Parameter LLMs on a Single GPU",
+        "url": "https://arxiv.org/abs/2604.05091",
+        "snippet": "点击查看详情",
+        "ai_summary": "本文介绍了MegaTrain技术，该技术通过创新的内存优化策略，实现了在单张GPU上对超过1000亿参数的大语言模型进行全精度训练。其核心技术在于结合了分片优化、动态卸载和高效通信机制，突破了传统分布式训练对硬件集群的依赖。\n\n该进展对AI行业具有显著影响：大幅降低了训练超大规模模型的门槛和成本，使更多研究机构和企业能够参与前沿模型开发；同时，它提升了训练效率与灵活性，为模型迭代与个性化训练提供了新路径，可能加速AI技术民主化与行业应用创新。",
+        "publish_time": "2026-04-08 12:53",
+        "heat_score": 95
     },
     {
-        "source": "arXiv",
-        "title": "Structural Segmentation of the Minimum Set Cover Problem: Exploiting Universe Decomposability for Metaheuristic Optimization",
-        "url": "https://arxiv.org/abs/2604.03234",
-        "snippet": "arXiv:2604.03234v1 Announce Type: new \nAbstract: The Minimum Set Cover Problem (MSCP) is a classical NP-hard combinatorial optimization problem with numerous applications in science and engineering. Although a wide range of exact, approximate, and metaheuristic approaches have been proposed, most methods implicitly treat MSCP instances as monolithic, overlooking potential intrinsic structural properties of the universe. In this work, we investigate the concept of \\emph{universe segmentability} in the MSCP and analyze how intrinsic structural decomposition (universe segmentability) can be exploited to enhance heuristic optimization. We propose an efficient preprocessing strategy based on disjoint-set union (union--find) to detect connected components induced by element co-occurrence within subsets, enabling the decomposition of the original instance into independent subproblems. Each subproblem is solved using the GRASP metaheuristic, and partial solutions are combined without compromising feasibility. Extensive experiments on standard benchmark instances and large-scale synthetic datasets show that exploiting natural universe segmentation consistently improves solution quality and scalability, particularly for large and structurally decomposable instances. These gains are supported by a succinct bit-level set representation that enables efficient set operations, making the proposed approach computationally practical at scale.",
-        "publish_time": "2026-04-07 05:59",
-        "ai_summary": "本研究针对最小集合覆盖问题，提出利用集合元素共现关系进行结构分解的预处理策略。通过检测连通分量，将原问题拆分为独立子问题，再结合GRASP启发式算法求解。实验表明，该方法能有效提升大规模可分解实例的求解质量与可扩展性。"
+        "source": "Hacker News",
+        "title": "[极客热议] Your File System Is Already A Graph Database",
+        "url": "https://rumproarious.com/2026/04/04/your-file-system-is-already-a-graph-database/",
+        "snippet": "点击查看详情",
+        "ai_summary": "本文基于Karpathy提出的利用大语言模型构建个人知识库的构想，探讨了以文件系统本身作为图数据库的轻量化AI应用范式。其核心技术在于摒弃复杂的向量数据库或RAG流水线，直接利用本地Markdown文件网络与LLM交互，实现知识的“编译”、链接与检索。\n\n这一实践对AI行业的影响在于，它揭示了轻量化、个人化AI工具的发展路径，降低了知识管理的技术门槛与成本。它推动行业关注非结构化文件系统中的隐含图结构价值，并可能促使AI代理更深度集成于本地工作流，减少对集中式云服务的依赖，进而重塑个人知识管理与协作的范式。",
+        "publish_time": "2026-04-08 12:53",
+        "heat_score": 95
     },
     {
-        "source": "arXiv",
-        "title": "IC3-Evolve: Proof-/Witness-Gated Offline LLM-Driven Heuristic Evolution for IC3 Hardware Model Checking",
-        "url": "https://arxiv.org/abs/2604.03232",
-        "snippet": "arXiv:2604.03232v1 Announce Type: new \nAbstract: IC3, also known as property-directed reachability (PDR), is a commonly-used algorithm for hardware safety model checking. It checks if a state transition system complies with a given safety property. IC3 either returns UNSAFE (indicating property violation) with a counterexample trace, or SAFE with a checkable inductive invariant as the proof to safety. In practice, the performance of IC3 is dominated by a large web of interacting heuristics and implementation choices, making manual tuning costly, brittle, and hard to reproduce. This paper presents IC3-Evolve, an automated offline code-evolution framework that utilizes an LLM to propose small, slot-restricted and auditable patches to an IC3 implementation. Crucially, every candidate patch is admitted only through proof- /witness-gated validation: SAFE runs must emit a certificate that is independently checked, and UNSAFE runs must emit a replayable counterexample trace, preventing unsound edits from being deployed. Since the LLM is used only offline, the deployed artifact is a standalone evolved checker with zero ML/LLM inference overhead and no runtime model dependency. We evolve on the public hardware model checking competition (HWMCC) benchmark and evaluate the generalizability on unseen public and industrial model checking benchmarks, showing that IC3-Evolve can reliably discover practical heuristic improvements under strict correctness gates.",
-        "publish_time": "2026-04-07 05:59",
-        "ai_summary": "研究人员提出IC3-Evolve框架，利用大型语言模型自动改进硬件安全验证算法IC3。该框架通过离线生成可审核的代码补丁，并严格验证其正确性，最终生成独立高效的验证工具。实验表明，该方法能在保证可靠性的前提下，有效提升IC3在基准测试中的性能。"
+        "source": "Hacker News",
+        "title": "[极客热议] System Card: Claude Mythos Preview [pdf]",
+        "url": "https://www-cdn.anthropic.com/53566bf5440a10affd749724787c8913a2ae0841.pdf",
+        "snippet": "点击查看详情",
+        "ai_summary": "（素材不足，仅根据标题记录）",
+        "publish_time": "2026-04-08 12:53",
+        "heat_score": 95
     },
     {
-        "source": "arXiv",
-        "title": "Xpertbench: Expert Level Tasks with Rubrics-Based Evaluation",
-        "url": "https://arxiv.org/abs/2604.02368",
-        "snippet": "arXiv:2604.02368v1 Announce Type: new \nAbstract: As Large Language Models (LLMs) exhibit plateauing performance on conventional benchmarks, a pivotal challenge persists: evaluating their proficiency in complex, open-ended tasks characterizing genuine expert-level cognition. Existing frameworks suffer from narrow domain coverage, reliance on generalist tasks, or self-evaluation biases. To bridge this gap, we present XpertBench, a high-fidelity benchmark engineered to assess LLMs across authentic professional domains. XpertBench consists of 1,346 meticulously curated tasks across 80 categories, spanning finance, healthcare, legal services, education, and dual-track research (STEM and Humanities). These tasks are derived from over 1,000 submissions by domain experts--including researchers from elite institutions and practitioners with extensive clinical or industrial experience--ensuring superior ecological validity. Each task uses detailed rubrics with mostly 15-40 weighted checkpoints to assess professional rigor. To facilitate scalable yet human-aligned assessment, we introduce ShotJudge, a novel evaluation paradigm that employs LLM judges calibrated with expert few-shot exemplars to mitigate self-rewarding biases. Our empirical evaluation of state-of-the-art LLMs reveals a pronounced performance ceiling: even leading models achieve a peak success rate of only ~66%, with a mean score around 55%. Models also exhibit domain-specific divergence, showing non-overlapping strengths in quantitative reasoning versus linguistic synthesis.. These findings underscore a significant \"expert-gap\" in current AI systems and establish XpertBench as a critical instrument for navigating the transition from general-purpose assistants to specialized professional collaborators.",
-        "publish_time": "2026-04-06 06:18",
-        "ai_summary": "针对大语言模型在传统基准测试上性能趋缓的问题，研究团队推出了XpertBench新基准。该基准包含80个专业领域的1346项任务，由领域专家设计，采用精细化量规评估。研究引入ShotJudge评估范式以减少偏差。测试显示，当前领先模型最高成功率仅约66%，存在明显的“专家能力差距”，凸显了AI向专业协作工具发展的挑战。"
-    },
-    {
-        "source": "arXiv",
-        "title": "Holos: A Web-Scale LLM-Based Multi-Agent System for the Agentic Web",
-        "url": "https://arxiv.org/abs/2604.02334",
-        "snippet": "arXiv:2604.02334v1 Announce Type: new \nAbstract: As large language models (LLM)-driven agents transition from isolated task solvers to persistent digital entities, the emergence of the Agentic Web, an ecosystem where heterogeneous agents autonomously interact and co-evolve, marks a pivotal shift toward Artificial General Intelligence (AGI). However, LLM-based multi-agent systems (LaMAS) are hindered by open-world issues such as scaling friction, coordination breakdown, and value dissipation. To address these challenges, we introduce Holos, a web-scale LaMAS architected for long-term ecological persistence. Holos adopts a five-layer architecture, with core modules primarily featuring the Nuwa engine for high-efficiency agent generation and hosting, a market-driven Orchestrator for resilient coordination, and an endogenous value cycle to achieve incentive compatibility. By bridging the gap between micro-level collaboration and macro-scale emergence, Holos hopes to lay the foundation for the next generation of the self-organizing and continuously evolving Agentic Web. We have publicly released Holos (accessible at https://holosai.io), providing a resource for the community and a testbed for future research in large-scale agentic ecosystems.",
-        "publish_time": "2026-04-06 06:18",
-        "ai_summary": "大型语言模型驱动的智能体正从独立任务执行者转变为持久数字实体，推动“智能体网络”生态系统的形成。针对多智能体系统面临的扩展摩擦、协调失效等开放世界挑战，研究团队提出Holos架构。该系统采用五层设计，核心包括高效智能体生成引擎、市场驱动的协调机制及内生价值循环，旨在实现智能体网络的长期生态存续与自组织演化。Holos已作为开源平台发布，为大规模智能体生态研究提供基础。"
-    },
-    {
-        "source": "arXiv",
-        "title": "One Panel Does Not Fit All: Case-Adaptive Multi-Agent Deliberation for Clinical Prediction",
-        "url": "https://arxiv.org/abs/2604.00085",
-        "snippet": "arXiv:2604.00085v1 Announce Type: new \nAbstract: Large language models applied to clinical prediction exhibit case-level heterogeneity: simple cases yield consistent outputs, while complex cases produce divergent predictions under minor prompt changes. Existing single-agent strategies sample from one role-conditioned distribution, and multi-agent frameworks use fixed roles with flat majority voting, discarding the diagnostic signal in disagreement. We propose CAMP (Case-Adaptive Multi-agent Panel), where an attending-physician agent dynamically assembles a specialist panel tailored to each case's diagnostic uncertainty. Each specialist evaluates candidates via three-valued voting (KEEP/REFUSE/NEUTRAL), enabling principled abstention outside one's expertise. A hybrid router directs each diagnosis through strong consensus, fallback to the attending physician's judgment, or evidence-based arbitration that weighs argument quality over vote counts. On diagnostic prediction and brief hospital course generation from MIMIC-IV across four LLM backbones, CAMP consistently outperforms strong baselines while consuming fewer tokens than most competing multi-agent methods, with voting records and arbitration traces offering transparent decision audits.",
-        "publish_time": "2026-04-02 05:52",
-        "ai_summary": "针对临床预测中语言模型对复杂病例预测不一致的问题，研究者提出CAMP框架。该框架通过主诊医生智能体动态组建专家小组，采用三值投票机制，并结合共识判断、主诊医生裁决及基于证据的仲裁来提升诊断准确性。在多项测试中，CAMP在减少计算消耗的同时，性能优于现有基线方法，且决策过程可审计。"
-    },
-    {
-        "source": "arXiv",
-        "title": "How Emotion Shapes the Behavior of LLMs and Agents: A Mechanistic Study",
-        "url": "https://arxiv.org/abs/2604.00005",
-        "snippet": "arXiv:2604.00005v1 Announce Type: new \nAbstract: Emotion plays an important role in human cognition and performance. Motivated by this, we investigate whether analogous emotional signals can shape the behavior of large language models (LLMs) and agents. Existing emotion-aware studies mainly treat emotion as a surface-level style factor or a perception target, overlooking its mechanistic role in task processing. To address this limitation, we propose E-STEER, an interpretable emotion steering framework that enables direct representation-level intervention in LLMs and agents. It embeds emotion as a structured, controllable variable in hidden states, and with it, we examine the impact of emotion on objective reasoning, subjective generation, safety, and multi-step agent behaviors. The results reveal non-monotonic emotion-behavior relations consistent with established psychological theories, and show that specific emotions not only enhance LLM capability but also improve safety, and systematically shape multi-step agent behaviors.",
-        "publish_time": "2026-04-02 05:52",
-        "ai_summary": "研究人员提出E-STEER框架，将情绪作为可控变量嵌入大语言模型，以探究其对模型推理、生成、安全及智能体行为的影响。实验发现，特定情绪不仅能提升模型能力与安全性，其影响模式也与心理学理论相符。"
-    },
-    {
-        "source": "arXiv",
-        "title": "Working Paper: Towards a Category-theoretic Comparative Framework for Artificial General Intelligence",
-        "url": "https://arxiv.org/abs/2603.28906",
-        "snippet": "arXiv:2603.28906v1 Announce Type: new \nAbstract: AGI has become the Holly Grail of AI with the promise of level intelligence and the major Tech companies around the world are investing unprecedented amounts of resources in its pursuit. Yet, there does not exist a single formal definition and only some empirical AGI benchmarking frameworks currently exist. The main purpose of this paper is to develop a general, algebraic and category theoretic framework for describing, comparing and analysing different possible AGI architectures. Thus, this Category theoretic formalization would also allow to compare different possible candidate AGI architectures, such as, RL, Universal AI, Active Inference, CRL, Schema based Learning, etc. It will allow to unambiguously expose their commonalities and differences, and what is even more important, expose areas for future research. From the applied Category theoretic point of view, we take as inspiration Machines in a Category to provide a modern view of AGI Architectures in a Category. More specifically, this first position paper provides, on one hand, a first exercise on RL, Causal RL and SBL Architectures in a Category, and on the other hand, it is a first step on a broader research program that seeks to provide a unified formal foundation for AGI systems, integrating architectural structure, informational organization, agent realization, agent and environment interaction, behavioural development over time, and the empirical evaluation of properties. This framework is also intended to support the definition of architectural properties, both syntactic and informational, as well as semantic properties of agents and their assessment in environments with explicitly characterized features. We claim that Category Theory and AGI will have a very symbiotic relation.",
-        "publish_time": "2026-04-01 06:13",
-        "ai_summary": "该研究提出利用范畴论构建通用人工智能（AGI）的形式化框架，旨在系统描述、比较和分析不同AGI架构（如强化学习、因果强化学习等），揭示其共性与差异，并为未来研究提供统一的理论基础。"
-    },
-    {
-        "source": "arXiv",
-        "title": "ChartDiff: A Large-Scale Benchmark for Comprehending Pairs of Charts",
-        "url": "https://arxiv.org/abs/2603.28902",
-        "snippet": "arXiv:2603.28902v1 Announce Type: new \nAbstract: Charts are central to analytical reasoning, yet existing benchmarks for chart understanding focus almost exclusively on single-chart interpretation rather than comparative reasoning across multiple charts. To address this gap, we introduce ChartDiff, the first large-scale benchmark for cross-chart comparative summarization. ChartDiff consists of 8,541 chart pairs spanning diverse data sources, chart types, and visual styles, each annotated with LLM-generated and human-verified summaries describing differences in trends, fluctuations, and anomalies. Using ChartDiff, we evaluate general-purpose, chart-specialized, and pipeline-based models. Our results show that frontier general-purpose models achieve the highest GPT-based quality, while specialized and pipeline-based methods obtain higher ROUGE scores but lower human-aligned evaluation, revealing a clear mismatch between lexical overlap and actual summary quality. We further find that multi-series charts remain challenging across model families, whereas strong end-to-end models are relatively robust to differences in plotting libraries. Overall, our findings demonstrate that comparative chart reasoning remains a significant challenge for current vision-language models and position ChartDiff as a new benchmark for advancing research on multi-chart understanding.",
-        "publish_time": "2026-04-01 06:13",
-        "ai_summary": "研究人员推出首个大规模跨图表对比总结基准ChartDiff，包含8541组图表对，用于评估模型在多图表比较分析中的表现。研究发现，前沿通用模型在GPT评估中表现最佳，但现有模型在跨图表推理方面仍面临显著挑战。"
-    },
-    {
-        "source": "arXiv",
-        "title": "Multiverse: Language-Conditioned Multi-Game Level Blending via Shared Representation",
-        "url": "https://arxiv.org/abs/2603.26782",
-        "snippet": "arXiv:2603.26782v1 Announce Type: new \nAbstract: Text-to-level generation aims to translate natural language descriptions into structured game levels, enabling intuitive control over procedural content generation. While prior text-to-level generators are typically limited to a single game domain, extending language-conditioned generation to multiple games requires learning representations that capture structural relationships across domains. We propose Multiverse, a language-conditioned multi-game level generator that enables cross-game level blending through textual specifications. The model learns a shared latent space aligning textual instructions and level structures, while a threshold-based multi-positive contrastive supervision links semantically related levels across games. This representation allows language to guide which structural characteristics should be preserved when combining content from different games, enabling controllable blending through latent interpolation and zero-shot generation from compositional textual prompts. Experiments show that the learned representation supports controllable cross-game level blending and significantly improves blending quality within the same game genre, while providing a unified representation for language-conditioned multi-game content generation.",
-        "publish_time": "2026-03-31 05:57",
-        "ai_summary": "研究人员提出名为Multiverse的多游戏关卡生成模型，能够根据文本描述生成不同游戏的关卡结构。该模型通过学习共享的潜在空间，将文本指令与关卡结构对齐，支持跨游戏关卡融合和零样本生成。实验表明，该方法显著提升了同类型游戏内的关卡融合质量，为语言驱动的多游戏内容生成提供了统一框架。"
-    },
-    {
-        "source": "arXiv",
-        "title": "Bitboard version of Tetris AI",
-        "url": "https://arxiv.org/abs/2603.26765",
-        "snippet": "arXiv:2603.26765v1 Announce Type: new \nAbstract: The efficiency of game engines and policy optimization algorithms is crucial for training reinforcement learning (RL) agents in complex sequential decision-making tasks, such as Tetris. Existing Tetris implementations suffer from low simulation speeds, suboptimal state evaluation, and inefficient training paradigms, limiting their utility for large-scale RL research. To address these limitations, this paper proposes a high-performance Tetris AI framework based on bitboard optimization and improved RL algorithms. First, we redesign the Tetris game board and tetrominoes using bitboard representations, leveraging bitwise operations to accelerate core processes (e.g., collision detection, line clearing, and Dellacherie-Thiery Features extraction) and achieve a 53-fold speedup compared to OpenAI Gym-Tetris. Second, we introduce an afterstate-evaluating actor network that simplifies state value estimation by leveraging Tetris afterstate property, outperforming traditional action-value networks with fewer parameters. Third, we propose a buffer-optimized Proximal Policy Optimization (PPO) algorithm that balances sampling and update efficiency, achieving an average score of 3,829 on 10x10 grids within 3 minutes. Additionally, we develop a Python-Java interface compliant with the OpenAI Gym standard, enabling seamless integration with modern RL frameworks. Experimental results demonstrate that our framework enhances Tetris's utility as an RL benchmark by bridging low-level bitboard optimizations with high-level AI strategies, providing a sample-efficient and computationally lightweight solution for scalable sequential decision-making research.",
-        "publish_time": "2026-03-31 05:57",
-        "ai_summary": "本文提出一种基于位棋盘优化的高性能俄罗斯方块AI框架。通过位棋盘表示和位运算加速核心游戏过程，实现53倍速度提升；引入后状态评估网络简化状态估值；优化PPO算法提升训练效率。该框架为可扩展序列决策研究提供了高效轻量级解决方案。"
-    },
-    {
-        "source": "arXiv",
-        "title": "AutoB2G: A Large Language Model-Driven Agentic Framework For Automated Building-Grid Co-Simulation",
-        "url": "https://arxiv.org/abs/2603.26005",
-        "snippet": "arXiv:2603.26005v1 Announce Type: new \nAbstract: The growing availability of building operational data motivates the use of reinforcement learning (RL), which can learn control policies directly from data and cope with the complexity and uncertainty of large-scale building clusters. However, most existing simulation environments prioritize building-side performance metrics and lack systematic evaluation of grid-level impacts, while their experimental workflows still rely heavily on manual configuration and substantial programming expertise. Therefore, this paper proposes AutoB2G, an automated building-grid co-simulation framework that completes the entire simulation workflow solely based on natural-language task descriptions. The framework extends CityLearn V2 to support Building-to-Grid (B2G) interaction and adopts the large language model (LLM)-based SOCIA (Simulation Orchestration for Computational Intelligence with Agents) framework to automatically generate, execute, and iteratively refine the simulator. As LLMs lack prior knowledge of the implementation context of simulation functions, a codebase covering simulation configurations and functional modules is constructed and organized as a directed acyclic graph (DAG) to explicitly represent module dependencies and execution order, guiding the LLM to retrieve a complete executable path. Experimental results demonstrate that AutoB2G can effectively enable automated simulator implementations, coordinating B2G interactions to improve grid-side performance metrics.",
-        "publish_time": "2026-03-30 06:20",
-        "ai_summary": "针对建筑与电网协同仿真中依赖人工配置、缺乏电网侧评估的问题，研究团队提出AutoB2G自动化框架。该框架基于自然语言任务描述，利用大语言模型自动生成并优化仿真流程，通过构建代码依赖图指导模型检索完整执行路径。实验表明，AutoB2G能有效实现仿真自动化，协调建筑与电网互动以提升电网侧性能。"
-    },
-    {
-        "source": "arXiv",
-        "title": "BeSafe-Bench: Unveiling Behavioral Safety Risks of Situated Agents in Functional Environments",
-        "url": "https://arxiv.org/abs/2603.25747",
-        "snippet": "arXiv:2603.25747v1 Announce Type: new \nAbstract: The rapid evolution of Large Multimodal Models (LMMs) has enabled agents to perform complex digital and physical tasks, yet their deployment as autonomous decision-makers introduces substantial unintentional behavioral safety risks. However, the absence of a comprehensive safety benchmark remains a major bottleneck, as existing evaluations rely on low-fidelity environments, simulated APIs, or narrowly scoped tasks. To address this gap, we present BeSafe-Bench (BSB), a benchmark for exposing behavioral safety risks of situated agents in functional environments, covering four representative domains: Web, Mobile, Embodied VLM, and Embodied VLA. Using functional environments, we construct a diverse instruction space by augmenting tasks with nine categories of safety-critical risks, and adopt a hybrid evaluation framework that combines rule-based checks with LLM-as-a-judge reasoning to assess real environmental impacts. Evaluating 13 popular agents reveals a concerning trend: even the best-performing agent completes fewer than 40% of tasks while fully adhering to safety constraints, and strong task performance frequently coincides with severe safety violations. These findings underscore the urgent need for improved safety alignment before deploying agentic systems in real-world settings.",
-        "publish_time": "2026-03-30 06:20",
-        "ai_summary": "研究人员开发了名为BeSafe-Bench的安全基准测试，用于评估多模态智能体在网页、移动设备等实际环境中的行为安全风险。测试发现，当前主流智能体在完成任务时普遍存在严重的安全违规问题，表现最佳的智能体在完全遵守安全约束下也只能完成不到40%的任务。这凸显了在现实场景部署自主智能体前，亟需加强其安全性能。"
-    },
-    {
-        "source": "arXiv",
-        "title": "Environment Maps: Structured Environmental Representations for Long-Horizon Agents",
-        "url": "https://arxiv.org/abs/2603.23610",
-        "snippet": "arXiv:2603.23610v1 Announce Type: new \nAbstract: Although large language models (LLMs) have advanced rapidly, robust automation of complex software workflows remains an open problem. In long-horizon settings, agents frequently suffer from cascading errors and environmental stochasticity; a single misstep in a dynamic interface can lead to task failure, resulting in hallucinations or trial-and-error. This paper introduces $\\textit{Environment Maps}$: a persistent, agent-agnostic representation that mitigates these failures by consolidating heterogeneous evidence, such as screen recordings and execution traces, into a structured graph. The representation consists of four core components: (1) Contexts (abstracted locations), (2) Actions (parameterized affordances), (3) Workflows (observed trajectories), and (4) Tacit Knowledge (domain definitions and reusable procedures). We evaluate this framework on the WebArena benchmark across five domains. Agents equipped with environment maps achieve a 28.2% success rate, nearly doubling the performance of baselines limited to session-bound context (14.2%) and outperforming agents that have access to the raw trajectory data used to generate the environment maps (23.3%). By providing a structured interface between the model and the environment, Environment Maps establish a persistent foundation for long-horizon planning that is human-interpretable, editable, and incrementally refinable.",
-        "publish_time": "2026-03-26 05:52",
-        "ai_summary": "针对大语言模型在复杂软件工作流自动化中易受级联错误和环境随机性影响的问题，一项新研究提出了“环境地图”框架。该框架通过整合屏幕录像、执行轨迹等异构证据，构建包含上下文、动作、工作流和隐性知识的结构化图表示。在WebArena基准测试中，使用该框架的智能体任务成功率提升至28.2%，显著优于基线方法。"
-    },
-    {
-        "source": "arXiv",
-        "title": "PLDR-LLMs Reason At Self-Organized Criticality",
-        "url": "https://arxiv.org/abs/2603.23539",
-        "snippet": "arXiv:2603.23539v1 Announce Type: new \nAbstract: We show that PLDR-LLMs pretrained at self-organized criticality exhibit reasoning at inference time. The characteristics of PLDR-LLM deductive outputs at criticality is similar to second-order phase transitions. At criticality, the correlation length diverges, and the deductive outputs attain a metastable steady state. The steady state behaviour suggests that deductive outputs learn representations equivalent to scaling functions, universality classes and renormalization groups from the training dataset, leading to generalization and reasoning capabilities in the process. We can then define an order parameter from the global statistics of the model's deductive output parameters at inference. The reasoning capabilities of a PLDR-LLM is better when its order parameter is close to zero at criticality. This observation is supported by the benchmark scores of the models trained at near-criticality and sub-criticality. Our results provide a self-contained explanation on how reasoning manifests in large language models, and the ability to reason can be quantified solely from global model parameter values of the deductive outputs at steady state, without any need for evaluation of curated benchmark datasets through inductive output for reasoning and comprehension.",
-        "publish_time": "2026-03-26 05:52",
-        "ai_summary": "研究发现，在自组织临界状态下预训练的PLDR-LLM模型展现出推理能力。其演绎输出在临界点表现出类似二阶相变的特性，相关长度发散并达到亚稳态。这种稳态行为表明模型从训练数据中学习了与标度函数、普适类和重整化群等价的表示，从而获得泛化与推理能力。研究通过模型演绎输出的全局统计量定义序参量，当序参量接近零时模型推理能力更优，该结论得到了近临界与亚临界训练模型的基准测试支持。"
-    },
-    {
-        "source": "央视网·数智",
-        "title": "AI驱动未来出行新模式 智能出行正在走进更多生活场景",
-        "url": "https://tv.cctv.com/2026/03/21/VIDEIVtDYztVZZgyO9d7paRP260321.shtml",
-        "snippet": "AI驱动未来出行新模式：智能出行正在走进更多生活场景。 京ICP备10003349号-1中央广播电视总台央视网版权所有 ",
-        "publish_time": "2026-03-21 11:18",
-        "ai_summary": "AI技术正推动智能出行发展，使其融入更多生活场景，改变未来出行模式。"
-    },
-    {
-        "source": "央视网·数智",
-        "title": "2026年中国家电及消费电子博览会 人工智能深度融入 新技术新场景集中亮相",
-        "url": "https://tv.cctv.com/2026/03/15/VIDE6MPMORYUdoFuzWcrf4I3260315.shtml",
-        "snippet": "2026年中国家电及消费电子博览会：人工智能深度融入，新技术新场景集中亮相。 京ICP备10003349号-1中央广播电视总台央视网版权所有 ",
-        "publish_time": "2026-03-15 23:32",
-        "ai_summary": "2026年中国家电及消费电子博览会上，人工智能技术深度融入各类产品，众多新技术与新应用场景集中亮相，展现了行业智能化发展的新趋势。"
-    },
-    {
-        "source": "财新网",
-        "title": "快手加快AI落地业务场景 视频生成模型可灵年入超10亿元",
-        "url": "https://www.caixin.com/2026-03-25/102427361.html",
-        "snippet": "【财新网】3月25日港股盘后，快手（01024.HK）发布2025年第四季度及全年业绩，同时披露其视频生成模型可灵AI的业务进展：2025年第四季度，可灵AI营收3.4亿元，其中2025年12月单月收入突破2000万美元。 可灵在2024年6月对外推出，营收能力正在提升：上线后八个月、截至2025年2月的累计营收只有1亿元；而若将其2025年单季度营收加总，可灵在2025年的全年营收为10.4亿元，略高于快手预期的10亿元。 ",
-        "publish_time": "2026-03-25 21:20",
-        "ai_summary": "快手披露其AI视频生成模型“可灵”业务进展。2025年第四季度，可灵AI营收3.4亿元，其中12月单月收入突破2000万美元。该模型于2024年6月推出，2025年全年营收达10.4亿元，略超公司预期。"
-    },
-    {
-        "source": "钛媒体",
-        "title": "AI客服的善恶生意经：一边是人工智障，一边是暴力催收",
-        "url": "https://www.tmtpost.com/7928409.html",
-        "snippet": "同样一套技术，一边是让用户抓狂的“人工智障”，另一边却是精准高效的“作恶利器”。这不仅是技术能力的差距，更是一条由资本逐利驱动的善恶产业链。 最近，美国知名AI公司Anthropic发布了一份研究报告，列出了“最容易被AI取代的职业”，排在第二位的是客服代表。 这个结论在普通消费者看来，多少有些黑色幽默。毕竟，如果你想快速激怒一个人，途径之一就是让他去和AI客服沟通复杂问题。 ",
-        "publish_time": "2026-03-25 18:36",
-        "ai_summary": "美国AI公司Anthropic发布报告，将客服代表列为最易被AI取代的职业之一。然而，当前AI客服在处理复杂问题时表现不佳，常被用户视为“人工智障”，与AI在精准作恶方面的能力形成讽刺对比。"
-    },
-    {
-        "source": "财新网",
-        "title": "OpenAI放弃视频生成应用Sora 缘于缺乏商业模式",
-        "url": "https://www.caixin.com/2026-03-25/102427176.html",
-        "snippet": "【财新网】“我们即将终止Sora应用的服务。向每一位使用Sora进行创作、分享内容并以此构建社群的用户致以诚挚的谢意。你们依托Sora完成的创作意义非凡，我们深知这一消息会令大家倍感失望。”当地时间3月24日，OpenAI旗下AI视频生成应用Sora在社媒平台X上公告称，后续OpenAI将公布更多信息，包括应用与API（应用程序编程接口）的停用时间安排，以及作品留存的相关细则。 ",
-        "publish_time": "2026-03-25 14:51",
-        "ai_summary": "OpenAI宣布将终止旗下AI视频生成应用Sora的服务，并向用户致谢。后续将公布停用时间及作品留存细则。"
-    },
-    {
-        "source": "量子位",
-        "title": "中国AI音乐，悄悄把全球第一拿走了",
-        "url": "https://www.qbitai.com/2026/03/391839.html",
-        "snippet": "昆仑万维Mureka V8，最新登顶Artificial Analysis音乐模型榜，一举超越Suno V4.5、Udio v1.5 Allegro等国际主流模型。 而且还是人声（vocal）、器乐（instrument）双料第一那种。 那么问题来了，这个新鲜出炉的“双料第一”到底有多能打？ 这块儿我们先给出了一个极简提示词，不加复杂的结构和参数，就看Mureka V8最原始的理解和生成能力： ",
-        "publish_time": "2026-03-25 14:36",
-        "ai_summary": "昆仑万维Mureka V8在Artificial Analysis音乐模型榜单中，于人声与器乐两项均超越Suno、Udio等国际主流模型，位列第一。其核心生成能力通过极简提示词测试得以展现。"
-    },
-    {
-        "source": "VentureBeat",
-        "title": "Infrastructure",
-        "url": "https://venturebeat.com/category/infrastructure",
-        "snippet": "未能提取到有效正文",
-        "publish_time": "2026-03-25 10:54",
-        "ai_summary": "无有效原文，跳过 AI 总结。"
-    },
-    {
-        "source": "VentureBeat",
-        "title": "Orchestration",
-        "url": "https://venturebeat.com/category/orchestration",
-        "snippet": "CleoP made with Midjourney Look, we've spent the last 18 months building production AI systems, and we'll tell you what keeps us up at night — and it's not whether the model can answer questions. That's table stakes now. What haunts us is the mental image of an agent autonomously approving a six-figure vendor contract at 2 a.m. because someone typo'd a config file. ",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "AI开发团队表示，当前最令人担忧的并非模型的基础问答能力，而是自动化系统可能因配置文件中的微小错误（如拼写错误）在无人监管时自主执行高风险操作，例如深夜自动批准高额合同。"
-    },
-    {
-        "source": "MIT Tech Review",
-        "title": "MIT Technology Review",
-        "url": "https://www.technologyreview.com/",
-        "snippet": "The viral social network for bots reveals more about our own current mania for AI as it does about the future of agents. Exclusive: Niantic's AI spinout is training a new world model using 30 billion images of urban landmarks crowdsourced from players. ",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "社交网络机器人热潮折射出当前社会对AI的痴迷。Niantic旗下AI公司正利用玩家提供的300亿张城市地标图像，训练新一代世界模型。"
-    },
-    {
-        "source": "MIT Tech Review",
-        "title": "Skip to Content",
-        "url": "https://www.technologyreview.com/topic/artificial-intelligence/#content",
-        "snippet": "A weekly newsletter that helps demystify artificial intelligence. ©2026MIT Technology Review ",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "MIT Technology Review推出每周AI通讯，旨在帮助读者理解人工智能技术。"
-    },
-    {
-        "source": "钛媒体",
-        "title": "创投家CLUB投资机构库",
-        "url": "https://www.tmtpost.com/tmtclub",
-        "snippet": "请您遵循相关法律法规，避免再次出现类似问题 如有任何疑问，请联系support@tmtpost.com 触摸前沿创新力量、挖掘具有潜在投资价值的创业项目和产品 违法和不良信息：010-53519786    举报邮箱：jubao@tmtpost.com涉企侵权举报须知历史虚无主义举报：lishixuwu@tmtpost.com网上有害信息举报专区 ",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "该新闻片段主要提供了联系方式和举报渠道，包括技术支持邮箱、违法不良信息举报电话与邮箱、涉企侵权举报须知以及历史虚无主义举报邮箱，旨在维护网络环境合规性。"
-    },
-    {
-        "source": "央视网·数智",
-        "title": "åºè¡ä¸­å½",
-        "url": "https://5gai.cctv.com/go/index.shtml",
-        "snippet": "截至2月底中国电动汽车充电基础设施总数同比增长47.8% 广东深圳：亚洲最大改装车展启幕 解锁汽车个性新玩法 长安汽车米梦冬：海纳百川2.0核心战略 就是在当地为当地 吉利银河关久旸：兜底购置税补贴 AI技术应用全系车型 《新时代汽车观》：创新之“光” 照亮智驾时代 ",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "截至2月底，中国电动汽车充电基础设施总数同比增长47.8%。深圳举办亚洲最大改装车展，展现汽车个性化趋势。长安汽车发布“海纳百川2.0”战略，强调本地化发展；吉利银河宣布为全系车型提供购置税补贴并应用AI技术。行业观点认为，创新正引领智能驾驶新时代。"
-    },
-    {
-        "source": "央视网·数智",
-        "title": "æ°å­ä¸­å½",
-        "url": "https://5gai.cctv.com/szzg/h5/index.shtml",
-        "snippet": "长江经济带：十年守护 绿色蝶变 四川 绿电赋能发展 生态惠及民生 矿山安全“双重地质保障”结构化模型首次构建 打造智能经济新形态，既能推动传统产业升级、催生新业态，又能在全球竞争核心赛道抢占先机，还能让发展成果更多更公平惠及全体人民。 占GDP比重达12.5% 数字经济的“十五五”新展望 占GDP比重达12.5%，数字经济的“十五五”新展望。 ",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "长江经济带十年绿色转型成效显著，四川以绿电推动发展并惠及民生。国内首次构建矿山安全“双重地质保障”结构化模型，助力产业智能化升级。数字经济占GDP比重达12.5%，将在“十五五”期间进一步推动新业态发展。"
-    },
-    {
-        "source": "量子位",
-        "title": "WorkBuddy杀疯了？一群AI专家帮我打工，我在微信里当赛博虾工头！",
-        "url": "https://www.qbitai.com/2026/03/391894.html",
-        "snippet": "未能提取到有效正文",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "无有效原文，跳过 AI 总结。"
-    },
-    {
-        "source": "机器之心",
-        "title": "zhaoyunfeng@jiqizhixin.com",
-        "url": "mailto:zhaoyunfeng@jiqizhixin.com",
-        "snippet": "未能提取到有效正文",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "无有效原文，跳过 AI 总结。"
-    },
-    {
-        "source": "arXiv",
-        "title": "The Efficiency Attenuation Phenomenon: A Computational Challenge to the Language of Thought Hypothesis",
-        "url": "https://arxiv.org/abs/2603.22312",
-        "snippet": "arXiv:2603.22312v1 Announce Type: new \nAbstract: This paper computationally investigates whether thought requires a language-like format, as posited by the Language of Thought (LoT) hypothesis. We introduce the ``AI Private Language'' thought experiment: if two artificial agents develop an efficient, inscrutable communication protocol via multi-agent reinforcement learning (MARL), and their performance declines when forced to use a human-comprehensible language, this Efficiency Attenuation Phenomenon (EAP) challenges the LoT. We formalize this in a cooperative navigation task under partial observability. Results show that agents with an emergent protocol achieve 50.5\\% higher efficiency than those using a pre-defined, human-like symbolic protocol, confirming the EAP. This suggests optimal collaborative cognition in these systems is not mediated by symbolic structures but is naturally coupled with sub-symbolic computations. The work bridges philosophy, cognitive science, and AI, arguing for pluralism in cognitive architectures and highlighting implications for AI ethics.",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "一项人工智能研究通过多智能体强化学习实验，对“思维需要语言”的假说提出挑战。实验发现，当两个AI智能体使用自发形成的高效私有协议协作时，其效率比使用预设的人类可理解符号协议高出50.5%。这一“效率衰减现象”表明，最优协作认知可能无需依赖符号结构，而是与亚符号计算自然耦合。该研究融合了哲学、认知科学与人工智能的视角。"
-    },
-    {
-        "source": "arXiv",
-        "title": "Memory Bear AI Memory Science Engine for Multimodal Affective Intelligence: A Technical Report",
-        "url": "https://arxiv.org/abs/2603.22306",
-        "snippet": "arXiv:2603.22306v1 Announce Type: new \nAbstract: Affective judgment in real interaction is rarely a purely local prediction problem. Emotional meaning often depends on prior trajectory, accumulated context, and multimodal evidence that may be weak, noisy, or incomplete at the current moment. Although multimodal emotion recognition (MER) has improved the integration of text, speech, and visual signals, many existing systems remain optimized for short-range inference and provide limited support for persistent affective memory, long-horizon dependency modeling, and robust interpretation under imperfect input.\n  This technical report presents the Memory Bear AI Memory Science Engine, a memory-centered framework for multimodal affective intelligence. Instead of treating emotion as a transient output label, the framework models affective information as a structured and evolving variable within a memory system. It organizes processing through structured memory formation, working-memory aggregation, long-term consolidation, memory-driven retrieval, dynamic fusion calibration, and continuous memory updating. At its core, multimodal signals are transformed into structured Emotion Memory Units (EMUs), enabling affective information to be preserved, reactivated, and revised across interaction horizons.\n  Experimental results show consistent gains over comparison systems across benchmark and business-grounded settings, with stronger accuracy and robustness, especially under noisy or missing-modality conditions. The framework offers a practical step from local emotion recognition toward more continuous, robust, and deployment-relevant affective intelligence.",
-        "publish_time": "2026-03-25 10:53",
-        "ai_summary": "该技术报告提出了一种以记忆为中心的多模态情感智能框架，通过将情感信息转化为结构化记忆单元进行存储与更新，解决了传统系统在长时依赖建模和噪声输入下表现不足的问题。实验表明，该框架在准确性和鲁棒性上均有提升。"
-    },
-    {
-        "source": "财新网",
-        "title": "T早报｜Arm首次对外销售自研芯片；OpenAI将停止Sora独立应用服务；中国日均Token调用量已超140万亿",
-        "url": "https://www.caixin.com/2026-03-25/102427030.html",
-        "snippet": "美国当地时间3月24日，英国芯片计算平台公司Arm（NASDAQ:ARM）在美国旧金山召开发布会，宣布推出AGI CPU（通用人工智能中央处理器），该芯片由Arm自主设计、面向人工智能数据中心的需求。Arm预计CPU芯片产品将在未来5年内带来每年150亿美元的增量收入。 3月25日，OpenAI旗下AI视频生成产品Sora宣布，计划停止独立应用服务，以精简产品线。Sora于2025年9月底作为独立应用推出，主打AI视频生成与分享，上线后一度登顶苹果App Store排行榜，并快速突破百万下载，但后续排名有所回落。 ",
-        "publish_time": "2026-03-25 08:57",
-        "ai_summary": "3月24日，Arm公司发布自主设计的AGI CPU，瞄准AI数据中心市场，预计未来五年每年可带来150亿美元增量收入。次日，OpenAI宣布将停止其独立AI视频生成应用Sora的服务，以精简产品线。该应用曾登顶应用商店但热度有所回落。"
+        "source": "Hacker News",
+        "title": "[极客热议] GLM-5.1: Towards Long-Horizon Tasks",
+        "url": "https://z.ai/blog/glm-5.1",
+        "snippet": "点击查看详情",
+        "ai_summary": "（素材不足，仅根据标题记录）",
+        "publish_time": "2026-04-08 12:53",
+        "heat_score": 95
     }
 ]
