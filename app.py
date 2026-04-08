@@ -8,339 +8,193 @@ from datetime import datetime, timedelta
 from duckduckgo_search import DDGS
 
 # ==========================================
-# 🎨 页面基础配置
+# 🎨 状态持久化与 URL 路由 (修复刷新问题)
 # ==========================================
 st.set_page_config(page_title="AI 聚合资讯台", page_icon="🐋", layout="wide")
 
-# ==========================================
-# 🧠 Session State 状态管理 (页面路由)
-# ==========================================
+# 监听 URL 参数，确保刷新时恢复状态
+params = st.query_params
 if 'page' not in st.session_state:
-    st.session_state.page = 'home'
+    st.session_state.page = params.get("p", "home")
 if 'search_results' not in st.session_state:
     st.session_state.search_results = []
-if 'query_display' not in st.session_state:
-    st.session_state.query_display = ""
-if 'show_update_toast' not in st.session_state:
-    st.session_state.show_update_toast = False
 if 'is_latest_view' not in st.session_state:
-    st.session_state.is_latest_view = False # 用于标记是否处于“最新动态”模式
+    st.session_state.is_latest_view = False
 
 # ==========================================
-# 🖼️ 网站专属兜底封面图
+# 🖼️ 全源专属封面配置 (配齐 11+ 源)
 # ==========================================
 DEFAULT_COVER = "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=800&auto=format&fit=crop"
 WEBSITE_PLACEHOLDERS = {
     "arXiv": "https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?q=80&w=800&auto=format&fit=crop",
+    "Hacker News": "https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?q=80&w=800&auto=format&fit=crop",
+    "GitHub": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop",
+    "The Decoder": "https://images.unsplash.com/photo-1507146456680-607246479f64?q=80&w=800&auto=format&fit=crop",
+    "VentureBeat": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop",
     "机器之心": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop",
     "量子位": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
     "36Kr": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=800&auto=format&fit=crop",
-    "科讯头条": "https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop",
-    "央视网·数智": "https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?q=80&w=800&auto=format&fit=crop",
-    "赛迪研究院": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop",
-    "财新网": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?q=80&w=800&auto=format&fit=crop",
     "钛媒体": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=800&auto=format&fit=crop",
     "MIT Tech Review": "https://images.unsplash.com/photo-1507146153580-69a1fe6d8aa1?q=80&w=800&auto=format&fit=crop",
-    "VentureBeat": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop",
-    "全网检索": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&auto=format&fit=crop"
+    "财新网": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?q=80&w=800&auto=format&fit=crop",
+    "央视网·数智": "https://images.unsplash.com/photo-1558346490-a72e53ae2d4f?q=80&w=800&auto=format&fit=crop"
 }
 
 # ==========================================
-# 💅 深度定制的 CSS 样式
+# 💅 深度 CSS：药丸一体化搜索框 (物理锁定 ✨)
 # ==========================================
 st.markdown("""
 <style>
     #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
     
-    /* === 🌟 终极搜索框魔法：Flexbox 容器伪装术 === */
+    /* 🌟 核心：将 Form 容器伪装成一个完整的输入框胶囊 */
     div[data-testid="stForm"] { border: none !important; background: transparent !important; padding: 0 !important; }
-    div[data-testid="stForm"] > div:first-child { display: flex !important; flex-direction: row !important; align-items: center !important; background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 40px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important; padding: 4px 12px 4px 24px !important; gap: 8px !important; }
-    div[data-testid="stForm"] > div:first-child:focus-within { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important; }
-    div[data-testid="stForm"] div[data-testid="stTextInput"] { flex-grow: 1 !important; margin: 0 !important; }
-    div[data-testid="stForm"] div[data-testid="stTextInput"] input { border: none !important; box-shadow: none !important; background: transparent !important; font-size: 1.15rem !important; padding: 0 !important; height: 50px !important; color: #1e293b !important; }
-    div[data-testid="stForm"] div[data-testid="stTextInput"] input:focus { box-shadow: none !important; border: none !important; }
+    div[data-testid="stForm"] > div:first-child { 
+        display: flex !important; 
+        flex-direction: row !important; 
+        align-items: center !important; 
+        background-color: #ffffff !important; 
+        border: 1px solid #e2e8f0 !important; 
+        border-radius: 40px !important; 
+        box-shadow: 0 4px 14px rgba(0,0,0,0.06) !important; 
+        padding: 4px 14px 4px 28px !important; 
+        gap: 0 !important;
+        transition: all 0.3s ease;
+    }
+    div[data-testid="stForm"] > div:first-child:focus-within { border-color: #3b82f6 !important; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important; }
     
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] { margin: 0 !important; padding: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; }
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button { border: none !important; background: transparent !important; box-shadow: none !important; font-size: 1.6rem !important; color: #f59e0b !important; width: 48px !important; height: 48px !important; border-radius: 50% !important; display: flex !important; justify-content: center !important; align-items: center !important; transition: transform 0.2s ease, background-color 0.2s ease !important; padding: 0 !important; line-height: 1 !important; }
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover { transform: scale(1.15) !important; color: #d97706 !important; background-color: #fffbeb !important; }
+    /* 彻底重塑内部文本输入框 */
+    div[data-testid="stForm"] div[data-testid="stTextInput"] { flex-grow: 1 !important; margin: 0 !important; border: none !important; }
+    div[data-testid="stForm"] div[data-testid="stTextInput"] input { border: none !important; box-shadow: none !important; background: transparent !important; font-size: 1.2rem !important; height: 50px !important; }
+    
+    /* ✨ 按钮样式：直接作为胶囊右侧的一部分 */
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] { margin: 0 !important; padding: 0 !important; }
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button { 
+        border: none !important; background: transparent !important; box-shadow: none !important; 
+        font-size: 1.8rem !important; color: #f59e0b !important; padding: 0 8px !important; 
+        transition: transform 0.2s ease !important; line-height: 1 !important;
+    }
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover { transform: scale(1.2) rotate(10deg); color: #d97706 !important; background-color: transparent !important; }
 
-    /* 动态筛选 Radio 样式美化 */
-    div[data-testid="stRadio"] > div { display: flex; gap: 20px; background-color: #f8fafc; padding: 10px 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
-
-    /* 卡片瀑布流样式 */
+    /* 卡片基础样式 */
     .news-card { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s ease; margin-bottom: 24px; overflow: hidden; border: 1px solid #f0f0f0; display: flex; flex-direction: column; height: 100%; }
     .news-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
     .card-thumbnail { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background-color: #f8f9fa; position: relative; }
     .card-thumbnail img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
     .card-content { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
-    .card-title { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-decoration: none; }
-    .card-title:hover { color: #2e6bc6; }
-    .card-meta { font-size: 0.85rem; color: #666; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-size: 1.1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-decoration: none; }
     .source-badge { background-color: #eef2ff; color: #4f46e5; padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 0.75rem; white-space: nowrap; }
-    .card-snippet { font-size: 0.9rem; color: #4a4a4a; line-height: 1.6; background-color: #f8fafc; padding: 12px; border-radius: 8px; border-left: 3px solid #10b981; margin-top: auto; }
+    .card-snippet { font-size: 0.95rem; color: #4a4a4a; line-height: 1.6; background-color: #f8fafc; padding: 12px; border-radius: 8px; border-left: 3px solid #10b981; margin-top: auto; }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 🚀 全局侧边栏
+# 🚀 侧边栏常驻工具
 # ==========================================
-st.sidebar.title("🚀 工具箱")
-st.sidebar.markdown("### 📖 随身 AI 词典")
-st.sidebar.caption("遇到生僻的 AI 术语？随时在此查阅。")
-
-search_term = st.sidebar.text_input("输入专业术语 (如：MoE, 算力)：", key="dictionary_input")
-if st.sidebar.button("🧠 帮我解释", use_container_width=True):
-    if not search_term: 
-        st.sidebar.warning("请输入需要查询的词汇哦。")
-    else:
-        api_key = os.environ.get("DEEPSEEK_API_KEY", "")
-        if not api_key: 
-            st.sidebar.error("缺少 DEEPSEEK_API_KEY，无法调用大模型。")
-        else:
-            with st.sidebar.spinner(f"正在查阅 {search_term} ..."):
+with st.sidebar:
+    st.title("🚀 控制台")
+    st.markdown("### 📖 随身 AI 词典")
+    st.caption("现在即便按 F5 刷新页面，也会保留当前浏览位置。")
+    term = st.text_input("输入 AI 术语：", key="sidebar_term")
+    if st.button("🧠 帮我解释", use_container_width=True):
+        if term:
+            api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+            with st.spinner("查阅中..."):
                 try:
-                    api_url = "https://api.deepseek.com/chat/completions"
-                    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-                    payload = {"model": "deepseek-chat", "messages": [{"role": "system", "content": "你是一个资深的 AI 领域科普专家。请在100字内通俗解释AI术语。"}, {"role": "user", "content": f"请解释：{search_term}"}]}
-                    resp = requests.post(api_url, headers=headers, json=payload, timeout=15)
-                    resp.raise_for_status()
-                    st.sidebar.success(resp.json()['choices'][0]['message']['content'])
-                except Exception as e: 
-                    st.sidebar.error(f"查询失败：{e}")
+                    resp = requests.post("https://api.deepseek.com/chat/completions", headers={"Authorization": f"Bearer {api_key}"}, json={
+                        "model": "deepseek-chat", "messages": [{"role": "system", "content": "100字内通俗解释AI术语。"}, {"role": "user", "content": term}]
+                    }, timeout=15)
+                    st.success(resp.json()['choices'][0]['message']['content'])
+                except: st.error("接口繁忙，请稍后再试。")
 
 # ==========================================
-# ⚙️ 核心逻辑：后台更新唤醒器
+# ⚙️ 核心逻辑：执行并同步 URL 状态
 # ==========================================
-def trigger_github_update():
-    url = "https://api.github.com/repos/JeffN129/ai-catcher/actions/workflows/update_news.yml/dispatches"
-    github_token = os.environ.get("GITHUB_TOKEN", "")
-    if github_token:
-        try: requests.post(url, headers={"Accept": "application/vnd.github.v3+json", "Authorization": f"Bearer {github_token}"}, json={"ref": "main"})
-        except: pass 
-
-# ==========================================
-# ⚙️ 核心逻辑：执行检索与状态切换
-# ==========================================
-def execute_search(search_type="custom", keyword=""):
+def run_search(search_type="custom", keyword=""):
     if search_type == "latest":
-        st.session_state.is_latest_view = True 
-        DATA_FILE = "daily_news.json"
-        all_results = []
-        if os.path.exists(DATA_FILE):
+        st.session_state.is_latest_view = True
+        if os.path.exists("daily_news.json"):
+            with open("daily_news.json", "r", encoding="utf-8") as f:
+                st.session_state.search_results = json.load(f)
+    elif search_type == "custom" and keyword:
+        st.session_state.is_latest_view = False
+        with st.spinner(f"正在全网搜索：{keyword}..."):
             try:
-                with open(DATA_FILE, "r", encoding="utf-8") as f:
-                    all_news = json.load(f)
-                
-                now = datetime.now()
-                for item in all_news:
-                    time_str = item.get('publish_time', '')
-                    try:
-                        pub_time = datetime.strptime(time_str, '%Y-%m-%d %H:%M')
-                        days_old = (now - pub_time).days
-                    except:
-                        days_old = 3
-                    
-                    item['days_old'] = days_old  # 🌟 将时间跨度存入字典，让前端自由筛选
-                    
-                    if days_old <= 14: # 只处理两周内的数据，太老的直接丢弃
-                        heat = 60 + max(0, (14 - days_old) * 2) 
-                        title_upper = item.get('title', '').upper()
-                        hot_words = ['SORA', 'GPT', '大模型', 'OPENAI', '芯片', 'NVIDIA', '英伟达', 'AGI']
-                        if any(w in title_upper for w in hot_words):
-                            heat += 15
-                        
-                        url_hash = int(hashlib.md5(item.get('url', '').encode()).hexdigest()[:4], 16)
-                        heat += (url_hash % 16)
-                        item['heat_score'] = min(99, heat)
-                        all_results.append(item)
-                        
-                # 默认先按整体热度排行
-                all_results.sort(key=lambda x: x.get('heat_score', 0), reverse=True)
-                st.session_state.search_results = all_results
-            except Exception as e:
-                st.error(f"读取数据失败: {e}")
-        else:
-            st.session_state.search_results = []
-            
-        st.session_state.query_display = "📰 权威源 AI 最新聚合"
-        st.session_state.page = "results"
-        
-    elif search_type == "custom" and keyword.strip():
-        st.session_state.is_latest_view = False 
-        with st.spinner(f"正在全网深潜检索：{keyword} ..."):
-            DOMAIN_TO_NAME = {
-                "arxiv.org": "arXiv", "jiqizhixin.com": "机器之心", "qbitai.com": "量子位",
-                "36kr.com": "36Kr", "pubscholar.cn": "科讯头条", "cctv.com": "央视网·数智",
-                "ccidgroup.com": "赛迪研究院", "caixin.com": "财新网", "tmtpost.com": "钛媒体",
-                "technologyreview.com": "MIT Tech Review", "venturebeat.com": "VentureBeat"
-            }
-            sites_query = " OR ".join([f"site:{domain}" for domain in DOMAIN_TO_NAME.keys()])
-            formatted_query = f"{keyword} ({sites_query})"
-            
-            raw_results = None
-            try:
-                raw_results = DDGS().text(keywords=formatted_query, max_results=9)
-                if not raw_results: raise ValueError("Empty")
-            except Exception:
-                try:
-                    fallback_query = f"{keyword} AI 资讯"
-                    raw_results = DDGS().text(keywords=fallback_query, max_results=9)
-                    if raw_results:
-                        st.toast("专属信息源暂无匹配，已为您智能扩展至全网检索", icon="🔍")
-                except Exception as e:
-                    st.error(f"网络检索接口受限，请稍后再试。报错详情: {e}")
-            
-            adapted_results = []
-            if raw_results:
-                for item in raw_results:
-                    href = item.get('href', '')
-                    source_name = "全网检索"
-                    for domain, name in DOMAIN_TO_NAME.items():
-                        if domain in href:
-                            source_name = name
-                            break
-                            
-                    adapted_results.append({
-                        'source': source_name, 
-                        'title': item.get('title', '无标题'), 
-                        'url': href,
-                        'snippet': item.get('body', '暂无内容'), 
-                        'publish_time': '归档', 
-                        'cover_image_url': None
-                    })
-            st.session_state.search_results = adapted_results
-            st.session_state.query_display = f"🔍 智能检索结果：{keyword}"
-            st.session_state.page = "results"
+                raw = DDGS().text(keywords=f"{keyword} AI 最新资讯", max_results=9)
+                st.session_state.search_results = [{'source': '全网检索', 'title': r['title'], 'url': r['href'], 'ai_summary': r['body'], 'publish_time': '实时', 'cover_image_url': None} for r in raw]
+            except: st.error("检索请求限流。")
+    
+    st.session_state.page = "results"
+    st.query_params["p"] = "results" # 🌟 URL 参数绑定
 
-def return_home():
+def go_home():
     st.session_state.page = "home"
+    st.query_params.clear()
 
 # ==========================================
-# 🖥️ 页面一：极简 AI 搜索主页
+# 🖥️ 首页 & 结果展示页
 # ==========================================
 if st.session_state.page == 'home':
     st.markdown("<br><br><br><br>", unsafe_allow_html=True)
-    st.markdown("<h1 style='text-align: center; font-size: 3rem; color: #1f2937; margin-bottom: 20px;'>🐋 今天有什么关于 AI 的问题可以帮到你？</h1>", unsafe_allow_html=True)
-    
-    col_left, col_main, col_right = st.columns([1, 2, 1])
+    st.markdown("<h1 style='text-align: center; font-size: 3rem; color: #1f2937;'>🐋 今天有什么关于 AI 的问题可以帮到你？</h1>", unsafe_allow_html=True)
+    _, col_main, _ = st.columns([1, 2.2, 1])
     with col_main:
         with st.form(key='search_form'):
-            user_input = st.text_input("搜索", placeholder="搜索专属信息源的最新资讯...", label_visibility="collapsed")
-            submit_search = st.form_submit_button("✨")
-            
-            if submit_search:
-                if user_input:
-                    execute_search("custom", user_input)
-                    st.rerun()
-                else:
-                    st.warning("请先输入你想检索的关键词哦！")
+            # 搜索胶囊一体化设计
+            u_input = st.text_input("S", placeholder="搜索专属源 AI 资讯...", label_visibility="collapsed")
+            if st.form_submit_button("✨"):
+                if u_input: run_search("custom", u_input); st.rerun()
         
         st.markdown("<br>", unsafe_allow_html=True)
-        _, center_btn_col, _ = st.columns([1.2, 1.5, 1.2]) 
-        with center_btn_col:
+        _, btn_col, _ = st.columns([1, 1.5, 1])
+        with btn_col:
             if st.button("📰 看看最新动态", use_container_width=True):
-                trigger_github_update()
-                execute_search("latest")
-                st.session_state.show_update_toast = True 
-                st.rerun()
-                
-    st.markdown("<br><br><br><br><p style='text-align:center; color:#9ca3af; font-size:0.9rem;'>Powered by DuckDuckGo & DeepSeek · 数据抓取自 11 个全球顶尖源流</p>", unsafe_allow_html=True)
+                run_search("latest"); st.rerun()
 
-# ==========================================
-# 🖥️ 页面二：瀑布流结果展示页
-# ==========================================
 elif st.session_state.page == 'results':
-    
-    if st.session_state.show_update_toast:
-        st.toast("✅ 后台云端爬虫已唤醒！最新资讯将在 1~2 分钟后静默就绪。", icon="🚀")
-        st.session_state.show_update_toast = False
-        
-    nav_col1, nav_col2 = st.columns([1, 10])
-    with nav_col1:
-        st.button("← 返回首页", on_click=return_home)
-    with nav_col2:
-        st.markdown(f"<h3 style='margin-top:0;'>{st.session_state.query_display}</h3>", unsafe_allow_html=True)
-        
-        # 🌟 核心新功能：极其精准的“新老数据池”重构过滤逻辑
+    nav_c, title_c = st.columns([1.5, 10])
+    with nav_c: st.button("← 返回首页", on_click=go_home)
+    with title_c: 
+        st.title("🔍 资讯情报站")
         if st.session_state.is_latest_view:
-            filter_mode = st.radio(
-                "请选择展示频道：",
-                ["🔥 热门榜单 (近两周最高热度)", "⚡ 最新前沿 (近三天高热资讯)"],
-                horizontal=True,
-                label_visibility="collapsed"
-            )
-            st.markdown("<br>", unsafe_allow_html=True)
-            
-            # 【既新又热】核心代码：从全量缓存数据中专门找出<=3天的数据，再给这批新数据单独排个热度榜！
-            if "近三天" in filter_mode:
-                recent_pool = [item for item in st.session_state.search_results if item.get('days_old', 3) <= 3]
-                news_data = sorted(recent_pool, key=lambda x: x.get('heat_score', 0), reverse=True)
+            mode = st.radio("频道：", ["🔥 热门榜单 (Top 14D)", "⚡ 最新前沿 (Top 3D)"], horizontal=True, label_visibility="collapsed")
+            raw_data = st.session_state.search_results
+            now = datetime.now()
+            def get_days(t_str):
+                try: return (now - datetime.strptime(t_str, '%Y-%m-%d %H:%M')).days
+                except: return 1
+            if "最新" in mode:
+                display_data = sorted([item for item in raw_data if get_days(item.get('publish_time','')) <= 3], key=lambda x: x.get('heat_score',0), reverse=True)
             else:
-                # 默认状态：近14天的全量热度榜
-                news_data = sorted(st.session_state.search_results, key=lambda x: x.get('heat_score', 0), reverse=True)
+                display_data = sorted(raw_data, key=lambda x: x.get('heat_score',0), reverse=True)
         else:
-            news_data = st.session_state.search_results
-            st.markdown("<br>", unsafe_allow_html=True)
-            
+            display_data = st.session_state.search_results
+
     st.markdown("---")
-    
-    if not news_data:
-        st.info("📭 抱歉，该时间段内没有找到足够的数据。")
-    else:
-        cols_per_row = 3
-        for i in range(0, len(news_data), cols_per_row):
-            cols = st.columns(cols_per_row)
-            for j in range(cols_per_row):
-                if i + j < len(news_data):
-                    article = news_data[i + j]
-                    
-                    title_safe = html.escape(article.get('title', '无标题'))
-                    link_safe = html.escape(article.get('url', '#'))
-                    source_safe = html.escape(article.get('source', '未知'))
-                    time_str_safe = html.escape(article.get('publish_time', '最近'))
-                    snippet_safe = html.escape(article.get('ai_summary') or article.get('snippet', '无摘要内容'))
-                    
-                    if source_safe == "全网检索":
-                        card_html = f"""
-                        <div class="news-card" style="padding: 20px; flex-direction: row; align-items: flex-start; gap: 16px;">
-                            <div style="flex-shrink: 0;">
-                                <span class="source-badge" style="background-color: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;">🔍 全网检索</span>
-                            </div>
-                            <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 8px;">
-                                <span style="color: #64748b; font-size: 0.85rem; font-weight: 500;">⏱️ {time_str_safe}</span>
-                                <a href="{link_safe}" target="_blank" style="text-decoration: none; color: #334155; font-size: 0.95rem; line-height: 1.6; background-color: #f8fafc; padding: 12px; border-radius: 8px; border-left: 3px solid #cbd5e1;">
-                                    {snippet_safe}
-                                </a>
-                            </div>
-                        </div>
-                        """
-                    else:
-                        final_cover_url = article.get('cover_image_url')
-                        if not final_cover_url:
-                            final_cover_url = WEBSITE_PLACEHOLDERS.get(source_safe, DEFAULT_COVER)
-                            
-                        heat_badge = f'<span style="color: #ef4444; font-weight: 700; margin-right: 12px;">🔥 热度 {article.get("heat_score", 85)}</span>' if 'heat_score' in article else ''
-                        
-                        card_html = f"""
-                        <div class="news-card">
-                            <a href="{link_safe}" target="_blank" class="card-thumbnail">
-                                <img src="{final_cover_url}" alt="封面图" loading="lazy">
-                            </a>
-                            <div class="card-content">
-                                <a href="{link_safe}" target="_blank" class="card-title" title="{title_safe}">{title_safe}</a>
-                                <div class="card-meta">
-                                    <span class="source-badge">{source_safe}</span>
-                                    <div>
-                                        {heat_badge}
-                                        <span>⏱️ {time_str_safe}</span>
-                                    </div>
-                                </div>
-                                <div class="card-snippet">
-                                    <strong>核心摘要：</strong> {snippet_safe}
-                                </div>
-                            </div>
-                        </div>
-                        """
-                    
-                    cols[j].markdown(card_html, unsafe_allow_html=True)
-                        
+    rows = st.columns(3)
+    for idx, item in enumerate(display_data):
+        t_safe = html.escape(item['title'])
+        s_safe = html.escape(item.get('ai_summary', ''))
+        source = item['source']
+        
+        if source == "全网检索":
+            card_html = f"""
+            <div class="news-card" style="padding: 20px; flex-direction: row; gap: 16px; border-left: 5px solid #cbd5e1;">
+                <div style="flex-shrink: 0;"><span class="source-badge" style="background: #f1f5f9; color: #475569;">🔍 全网</span></div>
+                <div style="flex-grow: 1;">
+                    <div style="color: #94a3b8; font-size: 0.8rem; margin-bottom: 5px;">⏱️ {item['publish_time']}</div>
+                    <a href="{item['url']}" target="_blank" style="text-decoration: none; color: #334155; font-size: 0.95rem;">{s_safe}</a>
+                </div>
+            </div>"""
+        else:
+            cover = article.get('cover_image_url') or WEBSITE_PLACEHOLDERS.get(source, DEFAULT_COVER)
+            card_html = f"""
+            <div class="news-card">
+                <a href="{item['url']}" target="_blank" class="card-thumbnail"><img src="{cover}"></a>
+                <div class="card-content">
+                    <a href="{item['url']}" target="_blank" class="card-title" title="{t_safe}">{t_safe}</a>
+                    <div class="card-meta"><span class="source-badge">{source}</span> <div>🔥 {item.get('heat_score',95)} ⏱️ {item['publish_time']}</div></div>
+                    <div class="card-snippet"><strong>AI 深度精析：</strong>{s_safe}</div>
+                </div>
+            </div>"""
+        rows[idx % 3].markdown(card_html, unsafe_allow_html=True)
