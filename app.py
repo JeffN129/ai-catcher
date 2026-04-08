@@ -20,6 +20,8 @@ if 'search_results' not in st.session_state:
     st.session_state.search_results = []
 if 'is_latest_view' not in st.session_state:
     st.session_state.is_latest_view = False
+if 'keyword_explanation' not in st.session_state:
+    st.session_state.keyword_explanation = None
 
 # ==========================================
 # 🖼️ 全源专属封面图配置
@@ -29,7 +31,7 @@ WEBSITE_PLACEHOLDERS = {
     "arXiv": "https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?q=80&w=800&auto=format&fit=crop",
     "Hacker News": "https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?q=80&w=800&auto=format&fit=crop",
     "GitHub": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800&auto=format&fit=crop",
-    "The Decoder": "https://images.unsplash.com/photo-1507146153580-69a1fe6d8aa1?q=80&w=800&auto=format&fit=crop",
+    "The Decoder": "https://images.unsplash.com/photo-1507146456680-607246479f64?q=80&w=800&auto=format&fit=crop",
     "VentureBeat": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop",
     "机器之心": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=800&auto=format&fit=crop",
     "量子位": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=800&auto=format&fit=crop",
@@ -75,6 +77,28 @@ st.markdown("""
     }
     div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] button:hover { transform: scale(1.2) rotate(10deg); color: #d97706 !important; background-color: transparent !important; }
 
+    /* 🧠 AI 词典合并卡片样式 */
+    .dictionary-hero {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border: 1px solid #bfdbfe;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    .dictionary-hero::before {
+        content: '🧠';
+        position: absolute;
+        right: -10px;
+        bottom: -10px;
+        font-size: 5rem;
+        opacity: 0.1;
+    }
+    .dict-term { color: #1e40af; font-size: 1.4rem; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .dict-content { color: #1e3a8a; font-size: 1.05rem; line-height: 1.7; }
+
     /* 卡片基础样式 */
     .news-card { background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s ease; margin-bottom: 24px; overflow: hidden; border: 1px solid #f0f0f0; display: flex; flex-direction: column; height: 100%; }
     .news-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
@@ -88,28 +112,23 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 🚀 侧边栏常驻组件
+# 🚀 侧边栏：仅保留控制功能
 # ==========================================
 with st.sidebar:
-    st.title("🚀 工具箱")
-    st.markdown("### 📖 随身 AI 词典")
+    st.title("🚀 控制台")
     st.caption("刷新浏览器也不会丢失当前浏览进度。")
-    term = st.text_input("输入 AI 术语：", key="sidebar_term")
-    if st.button("🧠 帮我解释", use_container_width=True):
-        if term:
-            api_key = os.environ.get("DEEPSEEK_API_KEY", "")
-            with st.spinner("查阅中..."):
-                try:
-                    resp = requests.post("https://api.deepseek.com/chat/completions", headers={"Authorization": f"Bearer {api_key}"}, json={
-                        "model": "deepseek-chat", "messages": [{"role": "system", "content": "100字内通俗解释AI术语。"}, {"role": "user", "content": term}]
-                    }, timeout=15)
-                    st.success(resp.json()['choices'][0]['message']['content'])
-                except: st.error("接口繁忙，请稍后再试。")
+    if st.button("🏠 返回首页", use_container_width=True):
+        st.session_state.page = "home"
+        st.session_state.keyword_explanation = None
+        st.query_params.clear()
+        st.rerun()
 
 # ==========================================
-# ⚙️ 核心逻辑：执行检索并同步 URL 状态
+# ⚙️ 核心逻辑：执行检索并同步 URL 状态 (集成 AI 释义)
 # ==========================================
 def run_search(search_type="custom", keyword=""):
+    st.session_state.keyword_explanation = None # 重置
+    
     if search_type == "latest":
         st.session_state.is_latest_view = True
         if os.path.exists("daily_news.json"):
@@ -117,6 +136,27 @@ def run_search(search_type="custom", keyword=""):
                 st.session_state.search_results = json.load(f)
     elif search_type == "custom" and keyword:
         st.session_state.is_latest_view = False
+        
+        # 🌟 合并逻辑：先获取 AI 对词汇的解释
+        api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+        if api_key:
+            try:
+                # 即使搜索报错也不影响后续资讯展示，所以包在 try 里
+                resp = requests.post("https://api.deepseek.com/chat/completions", headers={"Authorization": f"Bearer {api_key}"}, json={
+                    "model": "deepseek-chat", 
+                    "messages": [
+                        {"role": "system", "content": "你是一个资深的 AI 领域科普专家。请在100字内通俗解释用户提供的 AI 术语。如果该词与 AI 无关，请简要说明其通用定义。"}, 
+                        {"role": "user", "content": keyword}
+                    ]
+                }, timeout=10)
+                st.session_state.keyword_explanation = {
+                    "term": keyword,
+                    "content": resp.json()['choices'][0]['message']['content'].strip()
+                }
+            except:
+                pass
+
+        # 获取资讯
         with st.spinner(f"正在全网搜索：{keyword}..."):
             try:
                 raw = DDGS().text(keywords=f"{keyword} AI 最新资讯", max_results=9)
@@ -124,10 +164,11 @@ def run_search(search_type="custom", keyword=""):
             except: st.error("检索请求暂时限流。")
     
     st.session_state.page = "results"
-    st.query_params["p"] = "results" # 🌟 URL 参数绑定
+    st.query_params["p"] = "results" 
 
 def go_home():
     st.session_state.page = "home"
+    st.session_state.keyword_explanation = None
     st.query_params.clear()
 
 # ==========================================
@@ -140,7 +181,6 @@ if st.session_state.page == 'home':
     _, col_main, _ = st.columns([1, 2.2, 1])
     with col_main:
         with st.form(key='search_form'):
-            # 搜索胶囊一体化设计
             u_input = st.text_input("S", placeholder="搜索专属源最新 AI 资讯...", label_visibility="collapsed")
             if st.form_submit_button("✨"):
                 if u_input: 
@@ -169,7 +209,6 @@ elif st.session_state.page == 'results':
                 except: return 1
             
             if "最新" in mode:
-                # 重新筛选 3 天内的资讯并按热度排序 (既新又热)
                 display_data = sorted([item for item in raw_data if get_days(item.get('publish_time','')) <= 3], key=lambda x: x.get('heat_score',0), reverse=True)
             else:
                 display_data = sorted(raw_data, key=lambda x: x.get('heat_score',0), reverse=True)
@@ -177,6 +216,16 @@ elif st.session_state.page == 'results':
             display_data = st.session_state.search_results
 
     st.markdown("---")
+
+    # 🌟 核心新功能：展示 AI 词典释义 (合并版)
+    if st.session_state.keyword_explanation:
+        dict_data = st.session_state.keyword_explanation
+        st.markdown(f"""
+        <div class="dictionary-hero">
+            <div class="dict-term"><span>🧠</span> AI 术语解读: {dict_data['term']}</div>
+            <div class="dict-content">{dict_data['content']}</div>
+        </div>
+        """, unsafe_allow_html=True)
     
     if not display_data:
         st.info("📭 暂无匹配内容，请尝试更换关键词。")
@@ -184,13 +233,12 @@ elif st.session_state.page == 'results':
         # 瀑布流展示
         rows = st.columns(3)
         for idx, item in enumerate(display_data):
-            article = item # 🌟 关键修复：确保 article 变量在循环中正确指向
+            article = item 
             t_safe = html.escape(article['title'])
             s_safe = html.escape(article.get('ai_summary', ''))
             source = article['source']
             
             if source == "全网检索":
-                # 全网检索专用极简左右排版
                 card_html = f"""
                 <div class="news-card" style="padding: 20px; flex-direction: row; gap: 16px; border-left: 5px solid #cbd5e1;">
                     <div style="flex-shrink: 0;"><span class="source-badge" style="background: #f1f5f9; color: #475569;">🔍 全网</span></div>
@@ -200,7 +248,6 @@ elif st.session_state.page == 'results':
                     </div>
                 </div>"""
             else:
-                # 权威源标准封面卡片
                 cover = article.get('cover_image_url') or WEBSITE_PLACEHOLDERS.get(source, DEFAULT_COVER)
                 card_html = f"""
                 <div class="news-card">
